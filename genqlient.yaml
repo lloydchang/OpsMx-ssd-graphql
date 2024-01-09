@@ -1,0 +1,11 @@
+schema: schema/ssd.fetched.graphql
+operations:
+- operations/genqlient.graphql
+generated: pkg/generated/ssd.graphql.go
+package: generated
+use_struct_references: true
+bindings:
+  DateTime:
+    type: "*time.Time"
+  Int64:
+    type: int64

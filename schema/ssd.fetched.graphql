@@ -1,0 +1,3350 @@
+directive @custom(http: CustomHTTP, dql: String) on FIELD_DEFINITION
+
+directive @remote on OBJECT | INTERFACE | UNION | INPUT_OBJECT | ENUM
+
+directive @search(by: [DgraphIndex!]) on FIELD_DEFINITION
+
+directive @dgraph(type: String, pred: String) on OBJECT | INTERFACE | FIELD_DEFINITION
+
+directive @id(interface: Boolean) on FIELD_DEFINITION
+
+directive @withSubscription on OBJECT | INTERFACE | FIELD_DEFINITION
+
+directive @secret(field: String!, pred: String) on OBJECT | INTERFACE
+
+directive @auth(password: AuthRule, query: AuthRule, add: AuthRule, update: AuthRule, delete: AuthRule) on OBJECT | INTERFACE
+
+directive @lambdaOnMutate(add: Boolean, update: Boolean, delete: Boolean) on OBJECT | INTERFACE
+
+directive @generate(query: GenerateQueryParams, mutation: GenerateMutationParams, subscription: Boolean) on OBJECT | INTERFACE
+
+directive @hasInverse(field: String!) on FIELD_DEFINITION
+
+directive @remoteResponse(name: String) on FIELD_DEFINITION
+
+directive @lambda on FIELD_DEFINITION
+
+directive @cacheControl(maxAge: Int!) on QUERY
+
+directive @cascade(fields: [String]) on FIELD
+
+input AddApplicationComponentInput {
+  """id is randomly assigned"""
+  id: String!
+  name: String!
+  applicationEnvironment: ApplicationEnvironmentRef!
+  deployments: [ApplicationDeploymentRef!]
+}
+
+type AddApplicationComponentPayload {
+  applicationComponent(filter: ApplicationComponentFilter, order: ApplicationComponentOrder, first: Int, offset: Int): [ApplicationComponent]
+  numUids: Int
+}
+
+input AddApplicationDeploymentInput {
+  """id is randomly assigned"""
+  id: String!
+  image: [ImageRef!]
+  component: ApplicationComponentRef!
+  deployedAt: DateTime
+  deploymentStage: DeploymentStage!
+  source: String!
+  deployedBy: String
+  toolsUsed: String
+  deploymentRisk: ApplicationDeploymentRiskRef
+}
+
+type AddApplicationDeploymentPayload {
+  applicationDeployment(filter: ApplicationDeploymentFilter, order: ApplicationDeploymentOrder, first: Int, offset: Int): [ApplicationDeployment]
+  numUids: Int
+}
+
+input AddApplicationDeploymentRiskInput {
+  id: String!
+  sourceCodeAlertsScore: Int
+  buildAlertsScore: Int
+  artifactAlertsScore: Int
+  deploymentAlertsScore: Int
+  imageRiskStatus: RiskStatus
+  createdAt: DateTime!
+  applicationDeployment: ApplicationDeploymentRef!
+}
+
+type AddApplicationDeploymentRiskPayload {
+  applicationDeploymentRisk(filter: ApplicationDeploymentRiskFilter, order: ApplicationDeploymentRiskOrder, first: Int, offset: Int): [ApplicationDeploymentRisk]
+  numUids: Int
+}
+
+input AddApplicationEnvironmentInput {
+  """id is randomly assigned"""
+  id: String!
+  type: String!
+  application: ApplicationRef!
+  deploymentTarget: DeploymentTargetRef!
+  namespace: String!
+  toolsUsed: String
+  components: [ApplicationComponentRef!]
+  riskStatus: ApplicationRiskStatusRef
+}
+
+type AddApplicationEnvironmentPayload {
+  applicationEnvironment(filter: ApplicationEnvironmentFilter, order: ApplicationEnvironmentOrder, first: Int, offset: Int): [ApplicationEnvironment]
+  numUids: Int
+}
+
+input AddApplicationInput {
+  """id is randomly assigned"""
+  id: String!
+  name: String!
+  roles: [RoleRef!]
+  environments: [ApplicationEnvironmentRef!]
+  team: TeamRef!
+}
+
+type AddApplicationPayload {
+  application(filter: ApplicationFilter, order: ApplicationOrder, first: Int, offset: Int): [Application]
+  numUids: Int
+}
+
+input AddApplicationRiskStatusInput {
+  id: String!
+  riskStatus: RiskStatus
+  sourceCodeAlerts: Int
+  buildAlerts: Int
+  artifactAlerts: Int
+  deploymentAlerts: Int
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  applicationEnvironment: ApplicationEnvironmentRef!
+}
+
+type AddApplicationRiskStatusPayload {
+  applicationRiskStatus(filter: ApplicationRiskStatusFilter, order: ApplicationRiskStatusOrder, first: Int, offset: Int): [ApplicationRiskStatus]
+  numUids: Int
+}
+
+input AddBuildToolInput {
+  id: String!
+  buildId: String!
+  tool: String!
+  buildName: String
+  buildUrl: String!
+  image: String!
+  digest: String!
+  imageName: ImageNameRef
+  buildTime: DateTime
+  buildUser: String
+  sourceCodeTool: SourceCodeToolRef!
+  commitMetaData: CommitMetaDataRef
+  createdAt: DateTime!
+}
+
+type AddBuildToolPayload {
+  buildTool(filter: BuildToolFilter, order: BuildToolOrder, first: Int, offset: Int): [BuildTool]
+  numUids: Int
+}
+
+input AddCommitMetaDataInput {
+  id: String!
+  commit: String
+  repository: String
+  commitSign: String
+  noOfReviewersConf: String
+  reviewerList: String
+  approverList: String
+  buildTool: BuildToolRef!
+}
+
+type AddCommitMetaDataPayload {
+  commitMetaData(filter: CommitMetaDataFilter, order: CommitMetaDataOrder, first: Int, offset: Int): [CommitMetaData]
+  numUids: Int
+}
+
+input AddCWEInput {
+  """id is the CWE id, which is assigned from an anthority"""
+  id: Int!
+  name: String!
+  description: String!
+}
+
+type AddCWEPayload {
+  cWE(filter: CWEFilter, order: CWEOrder, first: Int, offset: Int): [CWE]
+  numUids: Int
+}
+
+input AddDeploymentTargetInput {
+  """id is randomly assigned"""
+  id: String!
+  name: String!
+  organization: OrganizationRef!
+}
+
+type AddDeploymentTargetPayload {
+  deploymentTarget(filter: DeploymentTargetFilter, order: DeploymentTargetOrder, first: Int, offset: Int): [DeploymentTarget]
+  numUids: Int
+}
+
+input AddImageComponentInput {
+  """id is randomly assigned"""
+  id: String!
+  type: String!
+  name: String!
+  version: String!
+  licenses: [String!]
+  purl: String
+  cpe: String
+  vulnerabilities: [VulnerabilityRef!]
+  imageScanResult: ImageScanResultRef
+}
+
+type AddImageComponentPayload {
+  imageComponent(filter: ImageComponentFilter, order: ImageComponentOrder, first: Int, offset: Int): [ImageComponent]
+  numUids: Int
+}
+
+input AddImageIndexInput {
+  """id is a hash of the image index's digest and ownership."""
+  id: String!
+
+  """
+  Digest is the image index's digest, or the image digest if it not an index
+  """
+  digest: String!
+  organization: OrganizationRef
+  imageNames: [ImageNameRef!]
+  images: [ImageRef!]
+  createdAt: DateTime!
+}
+
+type AddImageIndexPayload {
+  imageIndex(filter: ImageIndexFilter, order: ImageIndexOrder, first: Int, offset: Int): [ImageIndex]
+  numUids: Int
+}
+
+input AddImageInput {
+  """id is a hash of the image's digest and ownership."""
+  id: String!
+
+  """Digest is the image's digest"""
+  digest: String!
+  organization: OrganizationRef
+  imageIndexes: [ImageIndexRef!]
+
+  """
+  docker platform string, e.g. linux/arm64/v8 or linux/amd64 or linux/arm64
+  """
+  platform: String
+  deployments: [ApplicationDeploymentRef!]
+  scans: [ImageScanStateRef!]
+  createdAt: DateTime!
+}
+
+input AddImageNameInput {
+  """id is the name and ownership hashed."""
+  id: String!
+  organization: OrganizationRef
+
+  """
+  Name is the base name of the image, such as 'docker.io/library/fooimage'
+  """
+  name: String!
+  imageIndexes: [ImageIndexRef!]
+  createdAt: DateTime!
+}
+
+type AddImageNamePayload {
+  imageName(filter: ImageNameFilter, order: ImageNameOrder, first: Int, offset: Int): [ImageName]
+  numUids: Int
+}
+
+type AddImagePayload {
+  image(filter: ImageFilter, order: ImageOrder, first: Int, offset: Int): [Image]
+  numUids: Int
+}
+
+input AddImageScanResultInput {
+  """id is randomly assigned"""
+  id: String!
+  imageScanState: ImageScanStateRef!
+  components: [ImageComponentRef!]
+  vulnCriticalCount: Int!
+  vulnHighCount: Int!
+  vulnMediumCount: Int!
+  vulnLowCount: Int!
+  vulnInfoCount: Int!
+  vulnUnknownCount: Int!
+  vulnNoneCount: Int!
+  vulnTotalCount: Int!
+  createdAt: DateTime!
+}
+
+type AddImageScanResultPayload {
+  imageScanResult(filter: ImageScanResultFilter, order: ImageScanResultOrder, first: Int, offset: Int): [ImageScanResult]
+  numUids: Int
+}
+
+input AddImageScanStateInput {
+  """id is randomly assigned"""
+  id: String!
+  image: ImageRef
+  tools: [ToolInfoRef!]
+  databaseVersions: [KeyValueRef!]
+
+  """status of the scan"""
+  status: ImageScanStateStatus!
+
+  """
+  statusReason may hold a human-readable reason for the current state.  This is generally
+  only updated for 'error' status, where providing additional reasons for the failure
+  to a user or admin would help.
+  """
+  statusReason: String
+  result: ImageScanResultRef
+  updatedAt: DateTime!
+  createdAt: DateTime!
+}
+
+type AddImageScanStatePayload {
+  imageScanState(filter: ImageScanStateFilter, order: ImageScanStateOrder, first: Int, offset: Int): [ImageScanState]
+  numUids: Int
+}
+
+input AddKeyValueInput {
+  name: String!
+  value: String!
+}
+
+type AddKeyValuePayload {
+  keyValue(filter: KeyValueFilter, order: KeyValueOrder, first: Int, offset: Int): [KeyValue]
+  numUids: Int
+}
+
+input AddOrganizationInput {
+  """id is randomly assigned"""
+  id: String!
+  name: String!
+  roles: [RoleRef!]
+  teams: [TeamRef!]
+  environments: [DeploymentTargetRef!]
+}
+
+type AddOrganizationPayload {
+  organization(filter: OrganizationFilter, order: OrganizationOrder, first: Int, offset: Int): [Organization]
+  numUids: Int
+}
+
+input AddRoleInput {
+  """id is randomly assigned"""
+  id: String!
+
+  """group should be a URI format that includes a scope or realm"""
+  group: String!
+  permission: RolePermission!
+}
+
+type AddRolePayload {
+  role(filter: RoleFilter, order: RoleOrder, first: Int, offset: Int): [Role]
+  numUids: Int
+}
+
+input AddSchemaVersionInput {
+  version: String!
+}
+
+type AddSchemaVersionPayload {
+  schemaVersion(filter: SchemaVersionFilter, order: SchemaVersionOrder, first: Int, offset: Int): [SchemaVersion]
+  numUids: Int
+}
+
+input AddSourceCodeToolInput {
+  id: String!
+  createdAt: DateTime!
+  scm: String!
+  repository: String!
+  branch: String!
+  headCommit: String
+  diffCommits: String
+  licenseName: String
+  visibility: String
+  parentRepo: String
+  buildTool: BuildToolRef!
+}
+
+type AddSourceCodeToolPayload {
+  sourceCodeTool(filter: SourceCodeToolFilter, order: SourceCodeToolOrder, first: Int, offset: Int): [SourceCodeTool]
+  numUids: Int
+}
+
+input AddTeamInput {
+  """id is randomly assigned"""
+  id: String!
+  name: String!
+  roles: [RoleRef!]
+  organization: OrganizationRef!
+  applications: [ApplicationRef!]
+  labels: [KeyValueRef!]
+}
+
+type AddTeamPayload {
+  team(filter: TeamFilter, order: TeamOrder, first: Int, offset: Int): [Team]
+  numUids: Int
+}
+
+input AddToolInfoInput {
+  """id is randomly assigned"""
+  id: String!
+  name: String!
+  vendor: String
+  version: String
+}
+
+type AddToolInfoPayload {
+  toolInfo(filter: ToolInfoFilter, order: ToolInfoOrder, first: Int, offset: Int): [ToolInfo]
+  numUids: Int
+}
+
+input AddVulnerabilityInput {
+  """id is randomly assigned"""
+  id: String!
+
+  """namespace where the vulnerability comes from"""
+  namespace: String
+
+  """id within that namespace"""
+  namespaceId: String
+
+  """NVD CVE reference"""
+  nvdid: String
+  ratings: [VulnerabilitySeverity!]
+  cwes: [CWERef!]
+  description: String
+  detail: String
+  recommendation: String
+  advisoryURLs: [String!]
+  components: [ImageComponentRef!]
+}
+
+type AddVulnerabilityPayload {
+  vulnerability(filter: VulnerabilityFilter, order: VulnerabilityOrder, first: Int, offset: Int): [Vulnerability]
+  numUids: Int
+}
+
+type Application implements RBAC {
+  """id is randomly assigned"""
+  id: String!
+  name: String!
+  roles(filter: RoleFilter, order: RoleOrder, first: Int, offset: Int): [Role!]
+  environments(filter: ApplicationEnvironmentFilter, order: ApplicationEnvironmentOrder, first: Int, offset: Int): [ApplicationEnvironment!]
+  team(filter: TeamFilter): Team!
+  rolesAggregate(filter: RoleFilter): RoleAggregateResult
+  environmentsAggregate(filter: ApplicationEnvironmentFilter): ApplicationEnvironmentAggregateResult
+}
+
+type ApplicationAggregateResult {
+  count: Int
+  idMin: String
+  idMax: String
+  nameMin: String
+  nameMax: String
+}
+
+type ApplicationComponent {
+  """id is randomly assigned"""
+  id: String!
+  name: String!
+  applicationEnvironment(filter: ApplicationEnvironmentFilter): ApplicationEnvironment!
+  deployments(filter: ApplicationDeploymentFilter, order: ApplicationDeploymentOrder, first: Int, offset: Int): [ApplicationDeployment!]
+  deploymentsAggregate(filter: ApplicationDeploymentFilter): ApplicationDeploymentAggregateResult
+}
+
+type ApplicationComponentAggregateResult {
+  count: Int
+  idMin: String
+  idMax: String
+  nameMin: String
+  nameMax: String
+}
+
+input ApplicationComponentFilter {
+  id: StringHashFilter
+  name: StringExactFilter
+  has: [ApplicationComponentHasFilter]
+  and: [ApplicationComponentFilter]
+  or: [ApplicationComponentFilter]
+  not: ApplicationComponentFilter
+}
+
+enum ApplicationComponentHasFilter {
+  id
+  name
+  applicationEnvironment
+  deployments
+}
+
+input ApplicationComponentOrder {
+  asc: ApplicationComponentOrderable
+  desc: ApplicationComponentOrderable
+  then: ApplicationComponentOrder
+}
+
+enum ApplicationComponentOrderable {
+  id
+  name
+}
+
+input ApplicationComponentPatch {
+  name: String
+  applicationEnvironment: ApplicationEnvironmentRef
+  deployments: [ApplicationDeploymentRef!]
+}
+
+input ApplicationComponentRef {
+  """id is randomly assigned"""
+  id: String
+  name: String
+  applicationEnvironment: ApplicationEnvironmentRef
+  deployments: [ApplicationDeploymentRef!]
+}
+
+"""TODO: consider types of deployments:  helm, argo, etc"""
+type ApplicationDeployment {
+  """id is randomly assigned"""
+  id: String!
+  image(filter: ImageFilter, order: ImageOrder, first: Int, offset: Int): [Image!]
+  component(filter: ApplicationComponentFilter): ApplicationComponent!
+  deployedAt: DateTime
+  deploymentStage: DeploymentStage!
+  source: String!
+  deployedBy: String
+  toolsUsed: String
+  deploymentRisk(filter: ApplicationDeploymentRiskFilter): ApplicationDeploymentRisk
+  imageAggregate(filter: ImageFilter): ImageAggregateResult
+}
+
+type ApplicationDeploymentAggregateResult {
+  count: Int
+  idMin: String
+  idMax: String
+  deployedAtMin: DateTime
+  deployedAtMax: DateTime
+  sourceMin: String
+  sourceMax: String
+  deployedByMin: String
+  deployedByMax: String
+  toolsUsedMin: String
+  toolsUsedMax: String
+}
+
+input ApplicationDeploymentFilter {
+  id: StringHashFilter
+  has: [ApplicationDeploymentHasFilter]
+  and: [ApplicationDeploymentFilter]
+  or: [ApplicationDeploymentFilter]
+  not: ApplicationDeploymentFilter
+}
+
+enum ApplicationDeploymentHasFilter {
+  id
+  image
+  component
+  deployedAt
+  deploymentStage
+  source
+  deployedBy
+  toolsUsed
+  deploymentRisk
+}
+
+input ApplicationDeploymentOrder {
+  asc: ApplicationDeploymentOrderable
+  desc: ApplicationDeploymentOrderable
+  then: ApplicationDeploymentOrder
+}
+
+enum ApplicationDeploymentOrderable {
+  id
+  deployedAt
+  source
+  deployedBy
+  toolsUsed
+}
+
+input ApplicationDeploymentPatch {
+  image: [ImageRef!]
+  component: ApplicationComponentRef
+  deployedAt: DateTime
+  deploymentStage: DeploymentStage
+  source: String
+  deployedBy: String
+  toolsUsed: String
+  deploymentRisk: ApplicationDeploymentRiskRef
+}
+
+input ApplicationDeploymentRef {
+  """id is randomly assigned"""
+  id: String
+  image: [ImageRef!]
+  component: ApplicationComponentRef
+  deployedAt: DateTime
+  deploymentStage: DeploymentStage
+  source: String
+  deployedBy: String
+  toolsUsed: String
+  deploymentRisk: ApplicationDeploymentRiskRef
+}
+
+type ApplicationDeploymentRisk {
+  id: String!
+  sourceCodeAlertsScore: Int
+  buildAlertsScore: Int
+  artifactAlertsScore: Int
+  deploymentAlertsScore: Int
+  imageRiskStatus: RiskStatus
+  createdAt: DateTime!
+  applicationDeployment(filter: ApplicationDeploymentFilter): ApplicationDeployment!
+}
+
+type ApplicationDeploymentRiskAggregateResult {
+  count: Int
+  idMin: String
+  idMax: String
+  sourceCodeAlertsScoreMin: Int
+  sourceCodeAlertsScoreMax: Int
+  sourceCodeAlertsScoreSum: Int
+  sourceCodeAlertsScoreAvg: Float
+  buildAlertsScoreMin: Int
+  buildAlertsScoreMax: Int
+  buildAlertsScoreSum: Int
+  buildAlertsScoreAvg: Float
+  artifactAlertsScoreMin: Int
+  artifactAlertsScoreMax: Int
+  artifactAlertsScoreSum: Int
+  artifactAlertsScoreAvg: Float
+  deploymentAlertsScoreMin: Int
+  deploymentAlertsScoreMax: Int
+  deploymentAlertsScoreSum: Int
+  deploymentAlertsScoreAvg: Float
+  createdAtMin: DateTime
+  createdAtMax: DateTime
+}
+
+input ApplicationDeploymentRiskFilter {
+  id: StringHashFilter
+  has: [ApplicationDeploymentRiskHasFilter]
+  and: [ApplicationDeploymentRiskFilter]
+  or: [ApplicationDeploymentRiskFilter]
+  not: ApplicationDeploymentRiskFilter
+}
+
+enum ApplicationDeploymentRiskHasFilter {
+  id
+  sourceCodeAlertsScore
+  buildAlertsScore
+  artifactAlertsScore
+  deploymentAlertsScore
+  imageRiskStatus
+  createdAt
+  applicationDeployment
+}
+
+input ApplicationDeploymentRiskOrder {
+  asc: ApplicationDeploymentRiskOrderable
+  desc: ApplicationDeploymentRiskOrderable
+  then: ApplicationDeploymentRiskOrder
+}
+
+enum ApplicationDeploymentRiskOrderable {
+  id
+  sourceCodeAlertsScore
+  buildAlertsScore
+  artifactAlertsScore
+  deploymentAlertsScore
+  createdAt
+}
+
+input ApplicationDeploymentRiskPatch {
+  sourceCodeAlertsScore: Int
+  buildAlertsScore: Int
+  artifactAlertsScore: Int
+  deploymentAlertsScore: Int
+  imageRiskStatus: RiskStatus
+  createdAt: DateTime
+  applicationDeployment: ApplicationDeploymentRef
+}
+
+input ApplicationDeploymentRiskRef {
+  id: String
+  sourceCodeAlertsScore: Int
+  buildAlertsScore: Int
+  artifactAlertsScore: Int
+  deploymentAlertsScore: Int
+  imageRiskStatus: RiskStatus
+  createdAt: DateTime
+  applicationDeployment: ApplicationDeploymentRef
+}
+
+type ApplicationEnvironment {
+  """id is randomly assigned"""
+  id: String!
+  type: String!
+  application(filter: ApplicationFilter): Application!
+  deploymentTarget(filter: DeploymentTargetFilter): DeploymentTarget!
+  namespace: String!
+  toolsUsed: String
+  components(filter: ApplicationComponentFilter, order: ApplicationComponentOrder, first: Int, offset: Int): [ApplicationComponent!]
+  riskStatus(filter: ApplicationRiskStatusFilter): ApplicationRiskStatus
+  componentsAggregate(filter: ApplicationComponentFilter): ApplicationComponentAggregateResult
+}
+
+type ApplicationEnvironmentAggregateResult {
+  count: Int
+  idMin: String
+  idMax: String
+  typeMin: String
+  typeMax: String
+  namespaceMin: String
+  namespaceMax: String
+  toolsUsedMin: String
+  toolsUsedMax: String
+}
+
+input ApplicationEnvironmentFilter {
+  id: StringHashFilter
+  type: StringExactFilter
+  has: [ApplicationEnvironmentHasFilter]
+  and: [ApplicationEnvironmentFilter]
+  or: [ApplicationEnvironmentFilter]
+  not: ApplicationEnvironmentFilter
+}
+
+enum ApplicationEnvironmentHasFilter {
+  id
+  type
+  application
+  deploymentTarget
+  namespace
+  toolsUsed
+  components
+  riskStatus
+}
+
+input ApplicationEnvironmentOrder {
+  asc: ApplicationEnvironmentOrderable
+  desc: ApplicationEnvironmentOrderable
+  then: ApplicationEnvironmentOrder
+}
+
+enum ApplicationEnvironmentOrderable {
+  id
+  type
+  namespace
+  toolsUsed
+}
+
+input ApplicationEnvironmentPatch {
+  type: String
+  application: ApplicationRef
+  deploymentTarget: DeploymentTargetRef
+  namespace: String
+  toolsUsed: String
+  components: [ApplicationComponentRef!]
+  riskStatus: ApplicationRiskStatusRef
+}
+
+input ApplicationEnvironmentRef {
+  """id is randomly assigned"""
+  id: String
+  type: String
+  application: ApplicationRef
+  deploymentTarget: DeploymentTargetRef
+  namespace: String
+  toolsUsed: String
+  components: [ApplicationComponentRef!]
+  riskStatus: ApplicationRiskStatusRef
+}
+
+input ApplicationFilter {
+  id: StringHashFilter
+  name: StringExactFilter
+  has: [ApplicationHasFilter]
+  and: [ApplicationFilter]
+  or: [ApplicationFilter]
+  not: ApplicationFilter
+}
+
+enum ApplicationHasFilter {
+  id
+  name
+  roles
+  environments
+  team
+}
+
+input ApplicationOrder {
+  asc: ApplicationOrderable
+  desc: ApplicationOrderable
+  then: ApplicationOrder
+}
+
+enum ApplicationOrderable {
+  id
+  name
+}
+
+input ApplicationPatch {
+  name: String
+  roles: [RoleRef!]
+  environments: [ApplicationEnvironmentRef!]
+  team: TeamRef
+}
+
+input ApplicationRef {
+  """id is randomly assigned"""
+  id: String
+  name: String
+  roles: [RoleRef!]
+  environments: [ApplicationEnvironmentRef!]
+  team: TeamRef
+}
+
+type ApplicationRiskStatus {
+  id: String!
+  riskStatus: RiskStatus
+  sourceCodeAlerts: Int
+  buildAlerts: Int
+  artifactAlerts: Int
+  deploymentAlerts: Int
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  applicationEnvironment(filter: ApplicationEnvironmentFilter): ApplicationEnvironment!
+}
+
+type ApplicationRiskStatusAggregateResult {
+  count: Int
+  idMin: String
+  idMax: String
+  sourceCodeAlertsMin: Int
+  sourceCodeAlertsMax: Int
+  sourceCodeAlertsSum: Int
+  sourceCodeAlertsAvg: Float
+  buildAlertsMin: Int
+  buildAlertsMax: Int
+  buildAlertsSum: Int
+  buildAlertsAvg: Float
+  artifactAlertsMin: Int
+  artifactAlertsMax: Int
+  artifactAlertsSum: Int
+  artifactAlertsAvg: Float
+  deploymentAlertsMin: Int
+  deploymentAlertsMax: Int
+  deploymentAlertsSum: Int
+  deploymentAlertsAvg: Float
+  createdAtMin: DateTime
+  createdAtMax: DateTime
+  updatedAtMin: DateTime
+  updatedAtMax: DateTime
+}
+
+input ApplicationRiskStatusFilter {
+  id: StringHashFilter
+  has: [ApplicationRiskStatusHasFilter]
+  and: [ApplicationRiskStatusFilter]
+  or: [ApplicationRiskStatusFilter]
+  not: ApplicationRiskStatusFilter
+}
+
+enum ApplicationRiskStatusHasFilter {
+  id
+  riskStatus
+  sourceCodeAlerts
+  buildAlerts
+  artifactAlerts
+  deploymentAlerts
+  createdAt
+  updatedAt
+  applicationEnvironment
+}
+
+input ApplicationRiskStatusOrder {
+  asc: ApplicationRiskStatusOrderable
+  desc: ApplicationRiskStatusOrderable
+  then: ApplicationRiskStatusOrder
+}
+
+enum ApplicationRiskStatusOrderable {
+  id
+  sourceCodeAlerts
+  buildAlerts
+  artifactAlerts
+  deploymentAlerts
+  createdAt
+  updatedAt
+}
+
+input ApplicationRiskStatusPatch {
+  riskStatus: RiskStatus
+  sourceCodeAlerts: Int
+  buildAlerts: Int
+  artifactAlerts: Int
+  deploymentAlerts: Int
+  createdAt: DateTime
+  updatedAt: DateTime
+  applicationEnvironment: ApplicationEnvironmentRef
+}
+
+input ApplicationRiskStatusRef {
+  id: String
+  riskStatus: RiskStatus
+  sourceCodeAlerts: Int
+  buildAlerts: Int
+  artifactAlerts: Int
+  deploymentAlerts: Int
+  createdAt: DateTime
+  updatedAt: DateTime
+  applicationEnvironment: ApplicationEnvironmentRef
+}
+
+input AuthRule {
+  and: [AuthRule]
+  or: [AuthRule]
+  not: AuthRule
+  rule: String
+}
+
+type BuildTool {
+  id: String!
+  buildId: String!
+  tool: String!
+  buildName: String
+  buildUrl: String!
+  image: String!
+  digest: String!
+  imageName(filter: ImageNameFilter): ImageName
+  buildTime: DateTime
+  buildUser: String
+  sourceCodeTool(filter: SourceCodeToolFilter): SourceCodeTool!
+  commitMetaData(filter: CommitMetaDataFilter): CommitMetaData
+  createdAt: DateTime!
+}
+
+type BuildToolAggregateResult {
+  count: Int
+  idMin: String
+  idMax: String
+  buildIdMin: String
+  buildIdMax: String
+  toolMin: String
+  toolMax: String
+  buildNameMin: String
+  buildNameMax: String
+  buildUrlMin: String
+  buildUrlMax: String
+  imageMin: String
+  imageMax: String
+  digestMin: String
+  digestMax: String
+  buildTimeMin: DateTime
+  buildTimeMax: DateTime
+  buildUserMin: String
+  buildUserMax: String
+  createdAtMin: DateTime
+  createdAtMax: DateTime
+}
+
+input BuildToolFilter {
+  id: StringHashFilter
+  buildId: StringExactFilter
+  image: StringExactFilter
+  has: [BuildToolHasFilter]
+  and: [BuildToolFilter]
+  or: [BuildToolFilter]
+  not: BuildToolFilter
+}
+
+enum BuildToolHasFilter {
+  id
+  buildId
+  tool
+  buildName
+  buildUrl
+  image
+  digest
+  imageName
+  buildTime
+  buildUser
+  sourceCodeTool
+  commitMetaData
+  createdAt
+}
+
+input BuildToolOrder {
+  asc: BuildToolOrderable
+  desc: BuildToolOrderable
+  then: BuildToolOrder
+}
+
+enum BuildToolOrderable {
+  id
+  buildId
+  tool
+  buildName
+  buildUrl
+  image
+  digest
+  buildTime
+  buildUser
+  createdAt
+}
+
+input BuildToolPatch {
+  buildId: String
+  tool: String
+  buildName: String
+  buildUrl: String
+  image: String
+  digest: String
+  imageName: ImageNameRef
+  buildTime: DateTime
+  buildUser: String
+  sourceCodeTool: SourceCodeToolRef
+  commitMetaData: CommitMetaDataRef
+  createdAt: DateTime
+}
+
+input BuildToolRef {
+  id: String
+  buildId: String
+  tool: String
+  buildName: String
+  buildUrl: String
+  image: String
+  digest: String
+  imageName: ImageNameRef
+  buildTime: DateTime
+  buildUser: String
+  sourceCodeTool: SourceCodeToolRef
+  commitMetaData: CommitMetaDataRef
+  createdAt: DateTime
+}
+
+type CommitMetaData {
+  id: String!
+  commit: String
+  repository: String
+  commitSign: String
+  noOfReviewersConf: String
+  reviewerList: String
+  approverList: String
+  buildTool(filter: BuildToolFilter): BuildTool!
+}
+
+type CommitMetaDataAggregateResult {
+  count: Int
+  idMin: String
+  idMax: String
+  commitMin: String
+  commitMax: String
+  repositoryMin: String
+  repositoryMax: String
+  commitSignMin: String
+  commitSignMax: String
+  noOfReviewersConfMin: String
+  noOfReviewersConfMax: String
+  reviewerListMin: String
+  reviewerListMax: String
+  approverListMin: String
+  approverListMax: String
+}
+
+input CommitMetaDataFilter {
+  id: StringHashFilter
+  has: [CommitMetaDataHasFilter]
+  and: [CommitMetaDataFilter]
+  or: [CommitMetaDataFilter]
+  not: CommitMetaDataFilter
+}
+
+enum CommitMetaDataHasFilter {
+  id
+  commit
+  repository
+  commitSign
+  noOfReviewersConf
+  reviewerList
+  approverList
+  buildTool
+}
+
+input CommitMetaDataOrder {
+  asc: CommitMetaDataOrderable
+  desc: CommitMetaDataOrderable
+  then: CommitMetaDataOrder
+}
+
+enum CommitMetaDataOrderable {
+  id
+  commit
+  repository
+  commitSign
+  noOfReviewersConf
+  reviewerList
+  approverList
+}
+
+input CommitMetaDataPatch {
+  commit: String
+  repository: String
+  commitSign: String
+  noOfReviewersConf: String
+  reviewerList: String
+  approverList: String
+  buildTool: BuildToolRef
+}
+
+input CommitMetaDataRef {
+  id: String
+  commit: String
+  repository: String
+  commitSign: String
+  noOfReviewersConf: String
+  reviewerList: String
+  approverList: String
+  buildTool: BuildToolRef
+}
+
+input ContainsFilter {
+  point: PointRef
+  polygon: PolygonRef
+}
+
+input CustomHTTP {
+  url: String!
+  method: HTTPMethod!
+  body: String
+  graphql: String
+  mode: Mode
+  forwardHeaders: [String!]
+  secretHeaders: [String!]
+  introspectionHeaders: [String!]
+  skipIntrospection: Boolean
+}
+
+type CWE {
+  """id is the CWE id, which is assigned from an anthority"""
+  id: Int!
+  name: String!
+  description: String!
+}
+
+type CWEAggregateResult {
+  count: Int
+  idMin: Int
+  idMax: Int
+  idSum: Int
+  idAvg: Float
+  nameMin: String
+  nameMax: String
+  descriptionMin: String
+  descriptionMax: String
+}
+
+input CWEFilter {
+  id: IntFilter
+  has: [CWEHasFilter]
+  and: [CWEFilter]
+  or: [CWEFilter]
+  not: CWEFilter
+}
+
+enum CWEHasFilter {
+  id
+  name
+  description
+}
+
+input CWEOrder {
+  asc: CWEOrderable
+  desc: CWEOrderable
+  then: CWEOrder
+}
+
+enum CWEOrderable {
+  id
+  name
+  description
+}
+
+input CWEPatch {
+  name: String
+  description: String
+}
+
+input CWERef {
+  """id is the CWE id, which is assigned from an anthority"""
+  id: Int
+  name: String
+  description: String
+}
+
+"""
+The DateTime scalar type represents date and time as a string in RFC3339 format.
+For example: "1985-04-12T23:20:50.52Z" represents 20 mins 50.52 secs after the 23rd hour of Apr 12th 1985 in UTC.
+"""
+scalar DateTime
+
+input DateTimeFilter {
+  eq: DateTime
+  in: [DateTime]
+  le: DateTime
+  lt: DateTime
+  ge: DateTime
+  gt: DateTime
+  between: DateTimeRange
+}
+
+input DateTimeRange {
+  min: DateTime!
+  max: DateTime!
+}
+
+type DeleteApplicationComponentPayload {
+  applicationComponent(filter: ApplicationComponentFilter, order: ApplicationComponentOrder, first: Int, offset: Int): [ApplicationComponent]
+  msg: String
+  numUids: Int
+}
+
+type DeleteApplicationDeploymentPayload {
+  applicationDeployment(filter: ApplicationDeploymentFilter, order: ApplicationDeploymentOrder, first: Int, offset: Int): [ApplicationDeployment]
+  msg: String
+  numUids: Int
+}
+
+type DeleteApplicationDeploymentRiskPayload {
+  applicationDeploymentRisk(filter: ApplicationDeploymentRiskFilter, order: ApplicationDeploymentRiskOrder, first: Int, offset: Int): [ApplicationDeploymentRisk]
+  msg: String
+  numUids: Int
+}
+
+type DeleteApplicationEnvironmentPayload {
+  applicationEnvironment(filter: ApplicationEnvironmentFilter, order: ApplicationEnvironmentOrder, first: Int, offset: Int): [ApplicationEnvironment]
+  msg: String
+  numUids: Int
+}
+
+type DeleteApplicationPayload {
+  application(filter: ApplicationFilter, order: ApplicationOrder, first: Int, offset: Int): [Application]
+  msg: String
+  numUids: Int
+}
+
+type DeleteApplicationRiskStatusPayload {
+  applicationRiskStatus(filter: ApplicationRiskStatusFilter, order: ApplicationRiskStatusOrder, first: Int, offset: Int): [ApplicationRiskStatus]
+  msg: String
+  numUids: Int
+}
+
+type DeleteBuildToolPayload {
+  buildTool(filter: BuildToolFilter, order: BuildToolOrder, first: Int, offset: Int): [BuildTool]
+  msg: String
+  numUids: Int
+}
+
+type DeleteCommitMetaDataPayload {
+  commitMetaData(filter: CommitMetaDataFilter, order: CommitMetaDataOrder, first: Int, offset: Int): [CommitMetaData]
+  msg: String
+  numUids: Int
+}
+
+type DeleteCWEPayload {
+  cWE(filter: CWEFilter, order: CWEOrder, first: Int, offset: Int): [CWE]
+  msg: String
+  numUids: Int
+}
+
+type DeleteDeploymentTargetPayload {
+  deploymentTarget(filter: DeploymentTargetFilter, order: DeploymentTargetOrder, first: Int, offset: Int): [DeploymentTarget]
+  msg: String
+  numUids: Int
+}
+
+type DeleteImageComponentPayload {
+  imageComponent(filter: ImageComponentFilter, order: ImageComponentOrder, first: Int, offset: Int): [ImageComponent]
+  msg: String
+  numUids: Int
+}
+
+type DeleteImageIndexPayload {
+  imageIndex(filter: ImageIndexFilter, order: ImageIndexOrder, first: Int, offset: Int): [ImageIndex]
+  msg: String
+  numUids: Int
+}
+
+type DeleteImageNamePayload {
+  imageName(filter: ImageNameFilter, order: ImageNameOrder, first: Int, offset: Int): [ImageName]
+  msg: String
+  numUids: Int
+}
+
+type DeleteImagePayload {
+  image(filter: ImageFilter, order: ImageOrder, first: Int, offset: Int): [Image]
+  msg: String
+  numUids: Int
+}
+
+type DeleteImageScanResultPayload {
+  imageScanResult(filter: ImageScanResultFilter, order: ImageScanResultOrder, first: Int, offset: Int): [ImageScanResult]
+  msg: String
+  numUids: Int
+}
+
+type DeleteImageScanStatePayload {
+  imageScanState(filter: ImageScanStateFilter, order: ImageScanStateOrder, first: Int, offset: Int): [ImageScanState]
+  msg: String
+  numUids: Int
+}
+
+type DeleteKeyValuePayload {
+  keyValue(filter: KeyValueFilter, order: KeyValueOrder, first: Int, offset: Int): [KeyValue]
+  msg: String
+  numUids: Int
+}
+
+type DeleteOrganizationPayload {
+  organization(filter: OrganizationFilter, order: OrganizationOrder, first: Int, offset: Int): [Organization]
+  msg: String
+  numUids: Int
+}
+
+type DeleteRBACPayload {
+  rBAC(filter: RBACFilter, first: Int, offset: Int): [RBAC]
+  msg: String
+  numUids: Int
+}
+
+type DeleteRolePayload {
+  role(filter: RoleFilter, order: RoleOrder, first: Int, offset: Int): [Role]
+  msg: String
+  numUids: Int
+}
+
+type DeleteSchemaVersionPayload {
+  schemaVersion(filter: SchemaVersionFilter, order: SchemaVersionOrder, first: Int, offset: Int): [SchemaVersion]
+  msg: String
+  numUids: Int
+}
+
+type DeleteSourceCodeToolPayload {
+  sourceCodeTool(filter: SourceCodeToolFilter, order: SourceCodeToolOrder, first: Int, offset: Int): [SourceCodeTool]
+  msg: String
+  numUids: Int
+}
+
+type DeleteTeamPayload {
+  team(filter: TeamFilter, order: TeamOrder, first: Int, offset: Int): [Team]
+  msg: String
+  numUids: Int
+}
+
+type DeleteToolInfoPayload {
+  toolInfo(filter: ToolInfoFilter, order: ToolInfoOrder, first: Int, offset: Int): [ToolInfo]
+  msg: String
+  numUids: Int
+}
+
+type DeleteVulnerabilityPayload {
+  vulnerability(filter: VulnerabilityFilter, order: VulnerabilityOrder, first: Int, offset: Int): [Vulnerability]
+  msg: String
+  numUids: Int
+}
+
+enum DeploymentStage {
+  discovered
+  current
+  previous
+  blocked
+}
+
+"""
+DeploymentTarget describes a single place that things can be deployed into,
+such as an AWS account or a Kubernetes cluster.
+"""
+type DeploymentTarget {
+  """id is randomly assigned"""
+  id: String!
+  name: String!
+  organization(filter: OrganizationFilter): Organization!
+}
+
+type DeploymentTargetAggregateResult {
+  count: Int
+  idMin: String
+  idMax: String
+  nameMin: String
+  nameMax: String
+}
+
+input DeploymentTargetFilter {
+  id: StringHashFilter
+  name: StringExactFilter
+  has: [DeploymentTargetHasFilter]
+  and: [DeploymentTargetFilter]
+  or: [DeploymentTargetFilter]
+  not: DeploymentTargetFilter
+}
+
+enum DeploymentTargetHasFilter {
+  id
+  name
+  organization
+}
+
+input DeploymentTargetOrder {
+  asc: DeploymentTargetOrderable
+  desc: DeploymentTargetOrderable
+  then: DeploymentTargetOrder
+}
+
+enum DeploymentTargetOrderable {
+  id
+  name
+}
+
+input DeploymentTargetPatch {
+  name: String
+  organization: OrganizationRef
+}
+
+input DeploymentTargetRef {
+  """id is randomly assigned"""
+  id: String
+  name: String
+  organization: OrganizationRef
+}
+
+enum DgraphIndex {
+  int
+  int64
+  float
+  bool
+  hash
+  exact
+  term
+  fulltext
+  trigram
+  regexp
+  year
+  month
+  day
+  hour
+  geo
+}
+
+input FloatFilter {
+  eq: Float
+  in: [Float]
+  le: Float
+  lt: Float
+  ge: Float
+  gt: Float
+  between: FloatRange
+}
+
+input FloatRange {
+  min: Float!
+  max: Float!
+}
+
+input GenerateMutationParams {
+  add: Boolean
+  update: Boolean
+  delete: Boolean
+}
+
+input GenerateQueryParams {
+  get: Boolean
+  query: Boolean
+  password: Boolean
+  aggregate: Boolean
+}
+
+enum HTTPMethod {
+  GET
+  POST
+  PUT
+  PATCH
+  DELETE
+}
+
+"""
+Image holds a specific deployable image, with a platform.  This is the underlying object
+that is scanned by security scanners.  It may also be what is deployed, but generally
+these are found indrectly through the ImageIndex, with a platform filter.
+"""
+type Image {
+  """id is a hash of the image's digest and ownership."""
+  id: String!
+
+  """Digest is the image's digest"""
+  digest: String!
+  organization(filter: OrganizationFilter): Organization
+
+  """Indexes where this image is included"""
+  imageIndexes(filter: ImageIndexFilter, order: ImageIndexOrder, first: Int, offset: Int): [ImageIndex!]
+
+  """
+  docker platform string, e.g. linux/arm64/v8 or linux/amd64 or linux/arm64
+  """
+  platform: String
+
+  """scans contains the list of scans that are pending or completed."""
+  deployments(filter: ApplicationDeploymentFilter, order: ApplicationDeploymentOrder, first: Int, offset: Int): [ApplicationDeployment!]
+  scans(filter: ImageScanStateFilter, order: ImageScanStateOrder, first: Int, offset: Int): [ImageScanState!]
+  createdAt: DateTime!
+  imageIndexesAggregate(filter: ImageIndexFilter): ImageIndexAggregateResult
+  deploymentsAggregate(filter: ApplicationDeploymentFilter): ApplicationDeploymentAggregateResult
+  scansAggregate(filter: ImageScanStateFilter): ImageScanStateAggregateResult
+}
+
+type ImageAggregateResult {
+  count: Int
+  idMin: String
+  idMax: String
+  digestMin: String
+  digestMax: String
+  platformMin: String
+  platformMax: String
+  createdAtMin: DateTime
+  createdAtMax: DateTime
+}
+
+type ImageComponent {
+  """id is randomly assigned"""
+  id: String!
+  type: String!
+  name: String!
+  version: String!
+  licenses: [String!]
+  purl: String
+  cpe: String
+  vulnerabilities(filter: VulnerabilityFilter, order: VulnerabilityOrder, first: Int, offset: Int): [Vulnerability!]
+  imageScanResult(filter: ImageScanResultFilter): ImageScanResult
+  vulnerabilitiesAggregate(filter: VulnerabilityFilter): VulnerabilityAggregateResult
+}
+
+type ImageComponentAggregateResult {
+  count: Int
+  idMin: String
+  idMax: String
+  typeMin: String
+  typeMax: String
+  nameMin: String
+  nameMax: String
+  versionMin: String
+  versionMax: String
+  purlMin: String
+  purlMax: String
+  cpeMin: String
+  cpeMax: String
+}
+
+input ImageComponentFilter {
+  id: StringHashFilter
+  name: StringExactFilter
+  purl: StringExactFilter
+  cpe: StringExactFilter
+  has: [ImageComponentHasFilter]
+  and: [ImageComponentFilter]
+  or: [ImageComponentFilter]
+  not: ImageComponentFilter
+}
+
+enum ImageComponentHasFilter {
+  id
+  type
+  name
+  version
+  licenses
+  purl
+  cpe
+  vulnerabilities
+  imageScanResult
+}
+
+input ImageComponentOrder {
+  asc: ImageComponentOrderable
+  desc: ImageComponentOrderable
+  then: ImageComponentOrder
+}
+
+enum ImageComponentOrderable {
+  id
+  type
+  name
+  version
+  purl
+  cpe
+}
+
+input ImageComponentPatch {
+  type: String
+  name: String
+  version: String
+  licenses: [String!]
+  purl: String
+  cpe: String
+  vulnerabilities: [VulnerabilityRef!]
+  imageScanResult: ImageScanResultRef
+}
+
+input ImageComponentRef {
+  """id is randomly assigned"""
+  id: String
+  type: String
+  name: String
+  version: String
+  licenses: [String!]
+  purl: String
+  cpe: String
+  vulnerabilities: [VulnerabilityRef!]
+  imageScanResult: ImageScanResultRef
+}
+
+input ImageFilter {
+  id: StringHashFilter
+  has: [ImageHasFilter]
+  and: [ImageFilter]
+  or: [ImageFilter]
+  not: ImageFilter
+}
+
+enum ImageHasFilter {
+  id
+  digest
+  organization
+  imageIndexes
+  platform
+  deployments
+  scans
+  createdAt
+}
+
+"""
+ImageIndex holds the association between an ImageName and a specific list of images,
+each of which will have a platform (hopefully) and a unique digest.
+
+ImageIndex also has a list of deployments, which indicate where this image is currently
+in use.
+"""
+type ImageIndex {
+  """id is a hash of the image index's digest and ownership."""
+  id: String!
+
+  """
+  Digest is the image index's digest, or the image digest if it not an index
+  """
+  digest: String!
+  organization(filter: OrganizationFilter): Organization
+
+  """A pointer to the images this index is known by"""
+  imageNames(filter: ImageNameFilter, order: ImageNameOrder, first: Int, offset: Int): [ImageName!]
+
+  """Images which are part of this index"""
+  images(filter: ImageFilter, order: ImageOrder, first: Int, offset: Int): [Image!]
+  createdAt: DateTime!
+  imageNamesAggregate(filter: ImageNameFilter): ImageNameAggregateResult
+  imagesAggregate(filter: ImageFilter): ImageAggregateResult
+}
+
+type ImageIndexAggregateResult {
+  count: Int
+  idMin: String
+  idMax: String
+  digestMin: String
+  digestMax: String
+  createdAtMin: DateTime
+  createdAtMax: DateTime
+}
+
+input ImageIndexFilter {
+  id: StringHashFilter
+  has: [ImageIndexHasFilter]
+  and: [ImageIndexFilter]
+  or: [ImageIndexFilter]
+  not: ImageIndexFilter
+}
+
+enum ImageIndexHasFilter {
+  id
+  digest
+  organization
+  imageNames
+  images
+  createdAt
+}
+
+input ImageIndexOrder {
+  asc: ImageIndexOrderable
+  desc: ImageIndexOrderable
+  then: ImageIndexOrder
+}
+
+enum ImageIndexOrderable {
+  id
+  digest
+  createdAt
+}
+
+input ImageIndexPatch {
+  """
+  Digest is the image index's digest, or the image digest if it not an index
+  """
+  digest: String
+  organization: OrganizationRef
+  imageNames: [ImageNameRef!]
+  images: [ImageRef!]
+  createdAt: DateTime
+}
+
+input ImageIndexRef {
+  """id is a hash of the image index's digest and ownership."""
+  id: String
+
+  """
+  Digest is the image index's digest, or the image digest if it not an index
+  """
+  digest: String
+  organization: OrganizationRef
+  imageNames: [ImageNameRef!]
+  images: [ImageRef!]
+  createdAt: DateTime
+}
+
+type ImageName {
+  """id is the name and ownership hashed."""
+  id: String!
+  organization(filter: OrganizationFilter): Organization
+
+  """
+  Name is the base name of the image, such as 'docker.io/library/fooimage'
+  """
+  name: String!
+
+  """List of indexes associated with this name"""
+  imageIndexes(filter: ImageIndexFilter, order: ImageIndexOrder, first: Int, offset: Int): [ImageIndex!]
+  createdAt: DateTime!
+  imageIndexesAggregate(filter: ImageIndexFilter): ImageIndexAggregateResult
+}
+
+type ImageNameAggregateResult {
+  count: Int
+  idMin: String
+  idMax: String
+  nameMin: String
+  nameMax: String
+  createdAtMin: DateTime
+  createdAtMax: DateTime
+}
+
+input ImageNameFilter {
+  id: StringHashFilter
+  name: StringExactFilter
+  has: [ImageNameHasFilter]
+  and: [ImageNameFilter]
+  or: [ImageNameFilter]
+  not: ImageNameFilter
+}
+
+enum ImageNameHasFilter {
+  id
+  organization
+  name
+  imageIndexes
+  createdAt
+}
+
+input ImageNameOrder {
+  asc: ImageNameOrderable
+  desc: ImageNameOrderable
+  then: ImageNameOrder
+}
+
+enum ImageNameOrderable {
+  id
+  name
+  createdAt
+}
+
+input ImageNamePatch {
+  organization: OrganizationRef
+
+  """
+  Name is the base name of the image, such as 'docker.io/library/fooimage'
+  """
+  name: String
+  imageIndexes: [ImageIndexRef!]
+  createdAt: DateTime
+}
+
+input ImageNameRef {
+  """id is the name and ownership hashed."""
+  id: String
+  organization: OrganizationRef
+
+  """
+  Name is the base name of the image, such as 'docker.io/library/fooimage'
+  """
+  name: String
+  imageIndexes: [ImageIndexRef!]
+  createdAt: DateTime
+}
+
+input ImageOrder {
+  asc: ImageOrderable
+  desc: ImageOrderable
+  then: ImageOrder
+}
+
+enum ImageOrderable {
+  id
+  digest
+  platform
+  createdAt
+}
+
+input ImagePatch {
+  """Digest is the image's digest"""
+  digest: String
+  organization: OrganizationRef
+  imageIndexes: [ImageIndexRef!]
+
+  """
+  docker platform string, e.g. linux/arm64/v8 or linux/amd64 or linux/arm64
+  """
+  platform: String
+  deployments: [ApplicationDeploymentRef!]
+  scans: [ImageScanStateRef!]
+  createdAt: DateTime
+}
+
+input ImageRef {
+  """id is a hash of the image's digest and ownership."""
+  id: String
+
+  """Digest is the image's digest"""
+  digest: String
+  organization: OrganizationRef
+  imageIndexes: [ImageIndexRef!]
+
+  """
+  docker platform string, e.g. linux/arm64/v8 or linux/amd64 or linux/arm64
+  """
+  platform: String
+  deployments: [ApplicationDeploymentRef!]
+  scans: [ImageScanStateRef!]
+  createdAt: DateTime
+}
+
+type ImageScanResult {
+  """id is randomly assigned"""
+  id: String!
+  imageScanState(filter: ImageScanStateFilter): ImageScanState!
+  components(filter: ImageComponentFilter, order: ImageComponentOrder, first: Int, offset: Int): [ImageComponent!]
+  vulnCriticalCount: Int!
+  vulnHighCount: Int!
+  vulnMediumCount: Int!
+  vulnLowCount: Int!
+  vulnInfoCount: Int!
+  vulnUnknownCount: Int!
+  vulnNoneCount: Int!
+  vulnTotalCount: Int!
+  createdAt: DateTime!
+  componentsAggregate(filter: ImageComponentFilter): ImageComponentAggregateResult
+}
+
+type ImageScanResultAggregateResult {
+  count: Int
+  idMin: String
+  idMax: String
+  vulnCriticalCountMin: Int
+  vulnCriticalCountMax: Int
+  vulnCriticalCountSum: Int
+  vulnCriticalCountAvg: Float
+  vulnHighCountMin: Int
+  vulnHighCountMax: Int
+  vulnHighCountSum: Int
+  vulnHighCountAvg: Float
+  vulnMediumCountMin: Int
+  vulnMediumCountMax: Int
+  vulnMediumCountSum: Int
+  vulnMediumCountAvg: Float
+  vulnLowCountMin: Int
+  vulnLowCountMax: Int
+  vulnLowCountSum: Int
+  vulnLowCountAvg: Float
+  vulnInfoCountMin: Int
+  vulnInfoCountMax: Int
+  vulnInfoCountSum: Int
+  vulnInfoCountAvg: Float
+  vulnUnknownCountMin: Int
+  vulnUnknownCountMax: Int
+  vulnUnknownCountSum: Int
+  vulnUnknownCountAvg: Float
+  vulnNoneCountMin: Int
+  vulnNoneCountMax: Int
+  vulnNoneCountSum: Int
+  vulnNoneCountAvg: Float
+  vulnTotalCountMin: Int
+  vulnTotalCountMax: Int
+  vulnTotalCountSum: Int
+  vulnTotalCountAvg: Float
+  createdAtMin: DateTime
+  createdAtMax: DateTime
+}
+
+input ImageScanResultFilter {
+  id: StringHashFilter
+  vulnCriticalCount: IntFilter
+  vulnHighCount: IntFilter
+  vulnMediumCount: IntFilter
+  vulnLowCount: IntFilter
+  vulnInfoCount: IntFilter
+  vulnUnknownCount: IntFilter
+  vulnNoneCount: IntFilter
+  vulnTotalCount: IntFilter
+  has: [ImageScanResultHasFilter]
+  and: [ImageScanResultFilter]
+  or: [ImageScanResultFilter]
+  not: ImageScanResultFilter
+}
+
+enum ImageScanResultHasFilter {
+  id
+  imageScanState
+  components
+  vulnCriticalCount
+  vulnHighCount
+  vulnMediumCount
+  vulnLowCount
+  vulnInfoCount
+  vulnUnknownCount
+  vulnNoneCount
+  vulnTotalCount
+  createdAt
+}
+
+input ImageScanResultOrder {
+  asc: ImageScanResultOrderable
+  desc: ImageScanResultOrderable
+  then: ImageScanResultOrder
+}
+
+enum ImageScanResultOrderable {
+  id
+  vulnCriticalCount
+  vulnHighCount
+  vulnMediumCount
+  vulnLowCount
+  vulnInfoCount
+  vulnUnknownCount
+  vulnNoneCount
+  vulnTotalCount
+  createdAt
+}
+
+input ImageScanResultPatch {
+  imageScanState: ImageScanStateRef
+  components: [ImageComponentRef!]
+  vulnCriticalCount: Int
+  vulnHighCount: Int
+  vulnMediumCount: Int
+  vulnLowCount: Int
+  vulnInfoCount: Int
+  vulnUnknownCount: Int
+  vulnNoneCount: Int
+  vulnTotalCount: Int
+  createdAt: DateTime
+}
+
+input ImageScanResultRef {
+  """id is randomly assigned"""
+  id: String
+  imageScanState: ImageScanStateRef
+  components: [ImageComponentRef!]
+  vulnCriticalCount: Int
+  vulnHighCount: Int
+  vulnMediumCount: Int
+  vulnLowCount: Int
+  vulnInfoCount: Int
+  vulnUnknownCount: Int
+  vulnNoneCount: Int
+  vulnTotalCount: Int
+  createdAt: DateTime
+}
+
+"""
+ImageScanState holds the status of a scan request, which indicates that a scan is
+in progress, completed, or failed.  
+"""
+type ImageScanState {
+  """id is randomly assigned"""
+  id: String!
+
+  """image points to the specific image we are scanning"""
+  image(filter: ImageFilter): Image
+
+  """tools describes the tools used to process this scan"""
+  tools(filter: ToolInfoFilter, order: ToolInfoOrder, first: Int, offset: Int): [ToolInfo!]
+
+  """
+  databaseVersions holds the version and other metadata about the vuln or other database
+  """
+  databaseVersions(filter: KeyValueFilter, order: KeyValueOrder, first: Int, offset: Int): [KeyValue!]
+
+  """status of the scan"""
+  status: ImageScanStateStatus!
+
+  """
+  statusReason may hold a human-readable reason for the current state.  This is generally
+  only updated for 'error' status, where providing additional reasons for the failure
+  to a user or admin would help.
+  """
+  statusReason: String
+
+  """the result of the scan"""
+  result(filter: ImageScanResultFilter): ImageScanResult
+  updatedAt: DateTime!
+  createdAt: DateTime!
+  toolsAggregate(filter: ToolInfoFilter): ToolInfoAggregateResult
+  databaseVersionsAggregate(filter: KeyValueFilter): KeyValueAggregateResult
+}
+
+type ImageScanStateAggregateResult {
+  count: Int
+  idMin: String
+  idMax: String
+  statusReasonMin: String
+  statusReasonMax: String
+  updatedAtMin: DateTime
+  updatedAtMax: DateTime
+  createdAtMin: DateTime
+  createdAtMax: DateTime
+}
+
+input ImageScanStateFilter {
+  id: StringHashFilter
+  status: ImageScanStateStatus_exact
+  has: [ImageScanStateHasFilter]
+  and: [ImageScanStateFilter]
+  or: [ImageScanStateFilter]
+  not: ImageScanStateFilter
+}
+
+enum ImageScanStateHasFilter {
+  id
+  image
+  tools
+  databaseVersions
+  status
+  statusReason
+  result
+  updatedAt
+  createdAt
+}
+
+input ImageScanStateOrder {
+  asc: ImageScanStateOrderable
+  desc: ImageScanStateOrderable
+  then: ImageScanStateOrder
+}
+
+enum ImageScanStateOrderable {
+  id
+  statusReason
+  updatedAt
+  createdAt
+}
+
+input ImageScanStatePatch {
+  image: ImageRef
+  tools: [ToolInfoRef!]
+  databaseVersions: [KeyValueRef!]
+
+  """status of the scan"""
+  status: ImageScanStateStatus
+
+  """
+  statusReason may hold a human-readable reason for the current state.  This is generally
+  only updated for 'error' status, where providing additional reasons for the failure
+  to a user or admin would help.
+  """
+  statusReason: String
+  result: ImageScanResultRef
+  updatedAt: DateTime
+  createdAt: DateTime
+}
+
+input ImageScanStateRef {
+  """id is randomly assigned"""
+  id: String
+  image: ImageRef
+  tools: [ToolInfoRef!]
+  databaseVersions: [KeyValueRef!]
+
+  """status of the scan"""
+  status: ImageScanStateStatus
+
+  """
+  statusReason may hold a human-readable reason for the current state.  This is generally
+  only updated for 'error' status, where providing additional reasons for the failure
+  to a user or admin would help.
+  """
+  statusReason: String
+  result: ImageScanResultRef
+  updatedAt: DateTime
+  createdAt: DateTime
+}
+
+enum ImageScanStateStatus {
+  """The image scan has been started, but is not yet complete"""
+  pending
+
+  """The image scan is currently in progress"""
+  running
+
+  """the image scan is complete and results are available"""
+  complete
+
+  """
+  the image scan failed for some reason, and no further work will be performed on this scan
+  """
+  error
+}
+
+input ImageScanStateStatus_exact {
+  eq: ImageScanStateStatus
+  in: [ImageScanStateStatus]
+  le: ImageScanStateStatus
+  lt: ImageScanStateStatus
+  ge: ImageScanStateStatus
+  gt: ImageScanStateStatus
+  between: ImageScanStateStatus
+}
+
+"""
+The Int64 scalar type represents a signed 64‐bit numeric non‐fractional value.
+Int64 can represent values in range [-(2^63),(2^63 - 1)].
+"""
+scalar Int64
+
+input Int64Filter {
+  eq: Int64
+  in: [Int64]
+  le: Int64
+  lt: Int64
+  ge: Int64
+  gt: Int64
+  between: Int64Range
+}
+
+input Int64Range {
+  min: Int64!
+  max: Int64!
+}
+
+input IntersectsFilter {
+  polygon: PolygonRef
+  multiPolygon: MultiPolygonRef
+}
+
+input IntFilter {
+  eq: Int
+  in: [Int]
+  le: Int
+  lt: Int
+  ge: Int
+  gt: Int
+  between: IntRange
+}
+
+input IntRange {
+  min: Int!
+  max: Int!
+}
+
+"""
+KeyValue is a generic key/value pair, used as an attribute list or similar.
+"""
+type KeyValue {
+  name: String!
+  value: String!
+}
+
+type KeyValueAggregateResult {
+  count: Int
+  nameMin: String
+  nameMax: String
+  valueMin: String
+  valueMax: String
+}
+
+input KeyValueFilter {
+  has: [KeyValueHasFilter]
+  and: [KeyValueFilter]
+  or: [KeyValueFilter]
+  not: KeyValueFilter
+}
+
+enum KeyValueHasFilter {
+  name
+  value
+}
+
+input KeyValueOrder {
+  asc: KeyValueOrderable
+  desc: KeyValueOrderable
+  then: KeyValueOrder
+}
+
+enum KeyValueOrderable {
+  name
+  value
+}
+
+input KeyValuePatch {
+  name: String
+  value: String
+}
+
+input KeyValueRef {
+  name: String
+  value: String
+}
+
+enum Mode {
+  BATCH
+  SINGLE
+}
+
+type MultiPolygon {
+  polygons: [Polygon!]!
+}
+
+input MultiPolygonRef {
+  polygons: [PolygonRef!]!
+}
+
+type Mutation {
+  addSchemaVersion(input: [AddSchemaVersionInput!]!): AddSchemaVersionPayload
+  updateSchemaVersion(input: UpdateSchemaVersionInput!): UpdateSchemaVersionPayload
+  deleteSchemaVersion(filter: SchemaVersionFilter!): DeleteSchemaVersionPayload
+  updateRBAC(input: UpdateRBACInput!): UpdateRBACPayload
+  deleteRBAC(filter: RBACFilter!): DeleteRBACPayload
+  addRole(input: [AddRoleInput!]!, upsert: Boolean): AddRolePayload
+  updateRole(input: UpdateRoleInput!): UpdateRolePayload
+  deleteRole(filter: RoleFilter!): DeleteRolePayload
+  addKeyValue(input: [AddKeyValueInput!]!): AddKeyValuePayload
+  updateKeyValue(input: UpdateKeyValueInput!): UpdateKeyValuePayload
+  deleteKeyValue(filter: KeyValueFilter!): DeleteKeyValuePayload
+  addDeploymentTarget(input: [AddDeploymentTargetInput!]!, upsert: Boolean): AddDeploymentTargetPayload
+  updateDeploymentTarget(input: UpdateDeploymentTargetInput!): UpdateDeploymentTargetPayload
+  deleteDeploymentTarget(filter: DeploymentTargetFilter!): DeleteDeploymentTargetPayload
+  addOrganization(input: [AddOrganizationInput!]!, upsert: Boolean): AddOrganizationPayload
+  updateOrganization(input: UpdateOrganizationInput!): UpdateOrganizationPayload
+  deleteOrganization(filter: OrganizationFilter!): DeleteOrganizationPayload
+  addTeam(input: [AddTeamInput!]!, upsert: Boolean): AddTeamPayload
+  updateTeam(input: UpdateTeamInput!): UpdateTeamPayload
+  deleteTeam(filter: TeamFilter!): DeleteTeamPayload
+  addApplication(input: [AddApplicationInput!]!, upsert: Boolean): AddApplicationPayload
+  updateApplication(input: UpdateApplicationInput!): UpdateApplicationPayload
+  deleteApplication(filter: ApplicationFilter!): DeleteApplicationPayload
+  addApplicationEnvironment(input: [AddApplicationEnvironmentInput!]!, upsert: Boolean): AddApplicationEnvironmentPayload
+  updateApplicationEnvironment(input: UpdateApplicationEnvironmentInput!): UpdateApplicationEnvironmentPayload
+  deleteApplicationEnvironment(filter: ApplicationEnvironmentFilter!): DeleteApplicationEnvironmentPayload
+  addApplicationRiskStatus(input: [AddApplicationRiskStatusInput!]!, upsert: Boolean): AddApplicationRiskStatusPayload
+  updateApplicationRiskStatus(input: UpdateApplicationRiskStatusInput!): UpdateApplicationRiskStatusPayload
+  deleteApplicationRiskStatus(filter: ApplicationRiskStatusFilter!): DeleteApplicationRiskStatusPayload
+  addApplicationComponent(input: [AddApplicationComponentInput!]!, upsert: Boolean): AddApplicationComponentPayload
+  updateApplicationComponent(input: UpdateApplicationComponentInput!): UpdateApplicationComponentPayload
+  deleteApplicationComponent(filter: ApplicationComponentFilter!): DeleteApplicationComponentPayload
+  addApplicationDeployment(input: [AddApplicationDeploymentInput!]!, upsert: Boolean): AddApplicationDeploymentPayload
+  updateApplicationDeployment(input: UpdateApplicationDeploymentInput!): UpdateApplicationDeploymentPayload
+  deleteApplicationDeployment(filter: ApplicationDeploymentFilter!): DeleteApplicationDeploymentPayload
+  addApplicationDeploymentRisk(input: [AddApplicationDeploymentRiskInput!]!, upsert: Boolean): AddApplicationDeploymentRiskPayload
+  updateApplicationDeploymentRisk(input: UpdateApplicationDeploymentRiskInput!): UpdateApplicationDeploymentRiskPayload
+  deleteApplicationDeploymentRisk(filter: ApplicationDeploymentRiskFilter!): DeleteApplicationDeploymentRiskPayload
+  addBuildTool(input: [AddBuildToolInput!]!, upsert: Boolean): AddBuildToolPayload
+  updateBuildTool(input: UpdateBuildToolInput!): UpdateBuildToolPayload
+  deleteBuildTool(filter: BuildToolFilter!): DeleteBuildToolPayload
+  addSourceCodeTool(input: [AddSourceCodeToolInput!]!, upsert: Boolean): AddSourceCodeToolPayload
+  updateSourceCodeTool(input: UpdateSourceCodeToolInput!): UpdateSourceCodeToolPayload
+  deleteSourceCodeTool(filter: SourceCodeToolFilter!): DeleteSourceCodeToolPayload
+  addCommitMetaData(input: [AddCommitMetaDataInput!]!, upsert: Boolean): AddCommitMetaDataPayload
+  updateCommitMetaData(input: UpdateCommitMetaDataInput!): UpdateCommitMetaDataPayload
+  deleteCommitMetaData(filter: CommitMetaDataFilter!): DeleteCommitMetaDataPayload
+  addImageName(input: [AddImageNameInput!]!, upsert: Boolean): AddImageNamePayload
+  updateImageName(input: UpdateImageNameInput!): UpdateImageNamePayload
+  deleteImageName(filter: ImageNameFilter!): DeleteImageNamePayload
+  addImageIndex(input: [AddImageIndexInput!]!, upsert: Boolean): AddImageIndexPayload
+  updateImageIndex(input: UpdateImageIndexInput!): UpdateImageIndexPayload
+  deleteImageIndex(filter: ImageIndexFilter!): DeleteImageIndexPayload
+  addImage(input: [AddImageInput!]!, upsert: Boolean): AddImagePayload
+  updateImage(input: UpdateImageInput!): UpdateImagePayload
+  deleteImage(filter: ImageFilter!): DeleteImagePayload
+  addToolInfo(input: [AddToolInfoInput!]!, upsert: Boolean): AddToolInfoPayload
+  updateToolInfo(input: UpdateToolInfoInput!): UpdateToolInfoPayload
+  deleteToolInfo(filter: ToolInfoFilter!): DeleteToolInfoPayload
+  addImageScanState(input: [AddImageScanStateInput!]!, upsert: Boolean): AddImageScanStatePayload
+  updateImageScanState(input: UpdateImageScanStateInput!): UpdateImageScanStatePayload
+  deleteImageScanState(filter: ImageScanStateFilter!): DeleteImageScanStatePayload
+  addImageScanResult(input: [AddImageScanResultInput!]!, upsert: Boolean): AddImageScanResultPayload
+  updateImageScanResult(input: UpdateImageScanResultInput!): UpdateImageScanResultPayload
+  deleteImageScanResult(filter: ImageScanResultFilter!): DeleteImageScanResultPayload
+  addImageComponent(input: [AddImageComponentInput!]!, upsert: Boolean): AddImageComponentPayload
+  updateImageComponent(input: UpdateImageComponentInput!): UpdateImageComponentPayload
+  deleteImageComponent(filter: ImageComponentFilter!): DeleteImageComponentPayload
+  addVulnerability(input: [AddVulnerabilityInput!]!, upsert: Boolean): AddVulnerabilityPayload
+  updateVulnerability(input: UpdateVulnerabilityInput!): UpdateVulnerabilityPayload
+  deleteVulnerability(filter: VulnerabilityFilter!): DeleteVulnerabilityPayload
+  addCWE(input: [AddCWEInput!]!, upsert: Boolean): AddCWEPayload
+  updateCWE(input: UpdateCWEInput!): UpdateCWEPayload
+  deleteCWE(filter: CWEFilter!): DeleteCWEPayload
+}
+
+input NearFilter {
+  distance: Float!
+  coordinate: PointRef!
+}
+
+type Organization implements RBAC {
+  """id is randomly assigned"""
+  id: String!
+  name: String!
+  roles(filter: RoleFilter, order: RoleOrder, first: Int, offset: Int): [Role!]
+  teams(filter: TeamFilter, order: TeamOrder, first: Int, offset: Int): [Team!]
+  environments(filter: DeploymentTargetFilter, order: DeploymentTargetOrder, first: Int, offset: Int): [DeploymentTarget!]
+  rolesAggregate(filter: RoleFilter): RoleAggregateResult
+  teamsAggregate(filter: TeamFilter): TeamAggregateResult
+  environmentsAggregate(filter: DeploymentTargetFilter): DeploymentTargetAggregateResult
+}
+
+type OrganizationAggregateResult {
+  count: Int
+  idMin: String
+  idMax: String
+  nameMin: String
+  nameMax: String
+}
+
+input OrganizationFilter {
+  id: StringHashFilter
+  name: StringExactFilter
+  has: [OrganizationHasFilter]
+  and: [OrganizationFilter]
+  or: [OrganizationFilter]
+  not: OrganizationFilter
+}
+
+enum OrganizationHasFilter {
+  id
+  name
+  roles
+  teams
+  environments
+}
+
+input OrganizationOrder {
+  asc: OrganizationOrderable
+  desc: OrganizationOrderable
+  then: OrganizationOrder
+}
+
+enum OrganizationOrderable {
+  id
+  name
+}
+
+input OrganizationPatch {
+  name: String
+  roles: [RoleRef!]
+  teams: [TeamRef!]
+  environments: [DeploymentTargetRef!]
+}
+
+input OrganizationRef {
+  """id is randomly assigned"""
+  id: String
+  name: String
+  roles: [RoleRef!]
+  teams: [TeamRef!]
+  environments: [DeploymentTargetRef!]
+}
+
+type Point {
+  longitude: Float!
+  latitude: Float!
+}
+
+input PointGeoFilter {
+  near: NearFilter
+  within: WithinFilter
+}
+
+type PointList {
+  points: [Point!]!
+}
+
+input PointListRef {
+  points: [PointRef!]!
+}
+
+input PointRef {
+  longitude: Float!
+  latitude: Float!
+}
+
+type Polygon {
+  coordinates: [PointList!]!
+}
+
+input PolygonGeoFilter {
+  near: NearFilter
+  within: WithinFilter
+  contains: ContainsFilter
+  intersects: IntersectsFilter
+}
+
+input PolygonRef {
+  coordinates: [PointListRef!]!
+}
+
+type Query {
+  querySchemaVersion(filter: SchemaVersionFilter, order: SchemaVersionOrder, first: Int, offset: Int): [SchemaVersion]
+  aggregateSchemaVersion(filter: SchemaVersionFilter): SchemaVersionAggregateResult
+  queryRBAC(filter: RBACFilter, first: Int, offset: Int): [RBAC]
+  aggregateRBAC(filter: RBACFilter): RBACAggregateResult
+  getRole(id: String!): Role
+  queryRole(filter: RoleFilter, order: RoleOrder, first: Int, offset: Int): [Role]
+  aggregateRole(filter: RoleFilter): RoleAggregateResult
+  queryKeyValue(filter: KeyValueFilter, order: KeyValueOrder, first: Int, offset: Int): [KeyValue]
+  aggregateKeyValue(filter: KeyValueFilter): KeyValueAggregateResult
+  getDeploymentTarget(id: String!): DeploymentTarget
+  queryDeploymentTarget(filter: DeploymentTargetFilter, order: DeploymentTargetOrder, first: Int, offset: Int): [DeploymentTarget]
+  aggregateDeploymentTarget(filter: DeploymentTargetFilter): DeploymentTargetAggregateResult
+  getOrganization(id: String!): Organization
+  queryOrganization(filter: OrganizationFilter, order: OrganizationOrder, first: Int, offset: Int): [Organization]
+  aggregateOrganization(filter: OrganizationFilter): OrganizationAggregateResult
+  getTeam(id: String!): Team
+  queryTeam(filter: TeamFilter, order: TeamOrder, first: Int, offset: Int): [Team]
+  aggregateTeam(filter: TeamFilter): TeamAggregateResult
+  getApplication(id: String!): Application
+  queryApplication(filter: ApplicationFilter, order: ApplicationOrder, first: Int, offset: Int): [Application]
+  aggregateApplication(filter: ApplicationFilter): ApplicationAggregateResult
+  getApplicationEnvironment(id: String!): ApplicationEnvironment
+  queryApplicationEnvironment(filter: ApplicationEnvironmentFilter, order: ApplicationEnvironmentOrder, first: Int, offset: Int): [ApplicationEnvironment]
+  aggregateApplicationEnvironment(filter: ApplicationEnvironmentFilter): ApplicationEnvironmentAggregateResult
+  getApplicationRiskStatus(id: String!): ApplicationRiskStatus
+  queryApplicationRiskStatus(filter: ApplicationRiskStatusFilter, order: ApplicationRiskStatusOrder, first: Int, offset: Int): [ApplicationRiskStatus]
+  aggregateApplicationRiskStatus(filter: ApplicationRiskStatusFilter): ApplicationRiskStatusAggregateResult
+  getApplicationComponent(id: String!): ApplicationComponent
+  queryApplicationComponent(filter: ApplicationComponentFilter, order: ApplicationComponentOrder, first: Int, offset: Int): [ApplicationComponent]
+  aggregateApplicationComponent(filter: ApplicationComponentFilter): ApplicationComponentAggregateResult
+  getApplicationDeployment(id: String!): ApplicationDeployment
+  queryApplicationDeployment(filter: ApplicationDeploymentFilter, order: ApplicationDeploymentOrder, first: Int, offset: Int): [ApplicationDeployment]
+  aggregateApplicationDeployment(filter: ApplicationDeploymentFilter): ApplicationDeploymentAggregateResult
+  getApplicationDeploymentRisk(id: String!): ApplicationDeploymentRisk
+  queryApplicationDeploymentRisk(filter: ApplicationDeploymentRiskFilter, order: ApplicationDeploymentRiskOrder, first: Int, offset: Int): [ApplicationDeploymentRisk]
+  aggregateApplicationDeploymentRisk(filter: ApplicationDeploymentRiskFilter): ApplicationDeploymentRiskAggregateResult
+  getBuildTool(id: String!): BuildTool
+  queryBuildTool(filter: BuildToolFilter, order: BuildToolOrder, first: Int, offset: Int): [BuildTool]
+  aggregateBuildTool(filter: BuildToolFilter): BuildToolAggregateResult
+  getSourceCodeTool(id: String!): SourceCodeTool
+  querySourceCodeTool(filter: SourceCodeToolFilter, order: SourceCodeToolOrder, first: Int, offset: Int): [SourceCodeTool]
+  aggregateSourceCodeTool(filter: SourceCodeToolFilter): SourceCodeToolAggregateResult
+  getCommitMetaData(id: String!): CommitMetaData
+  queryCommitMetaData(filter: CommitMetaDataFilter, order: CommitMetaDataOrder, first: Int, offset: Int): [CommitMetaData]
+  aggregateCommitMetaData(filter: CommitMetaDataFilter): CommitMetaDataAggregateResult
+  getImageName(id: String!): ImageName
+  queryImageName(filter: ImageNameFilter, order: ImageNameOrder, first: Int, offset: Int): [ImageName]
+  aggregateImageName(filter: ImageNameFilter): ImageNameAggregateResult
+  getImageIndex(id: String!): ImageIndex
+  queryImageIndex(filter: ImageIndexFilter, order: ImageIndexOrder, first: Int, offset: Int): [ImageIndex]
+  aggregateImageIndex(filter: ImageIndexFilter): ImageIndexAggregateResult
+  getImage(id: String!): Image
+  queryImage(filter: ImageFilter, order: ImageOrder, first: Int, offset: Int): [Image]
+  aggregateImage(filter: ImageFilter): ImageAggregateResult
+  getToolInfo(id: String!): ToolInfo
+  queryToolInfo(filter: ToolInfoFilter, order: ToolInfoOrder, first: Int, offset: Int): [ToolInfo]
+  aggregateToolInfo(filter: ToolInfoFilter): ToolInfoAggregateResult
+  getImageScanState(id: String!): ImageScanState
+  queryImageScanState(filter: ImageScanStateFilter, order: ImageScanStateOrder, first: Int, offset: Int): [ImageScanState]
+  aggregateImageScanState(filter: ImageScanStateFilter): ImageScanStateAggregateResult
+  getImageScanResult(id: String!): ImageScanResult
+  queryImageScanResult(filter: ImageScanResultFilter, order: ImageScanResultOrder, first: Int, offset: Int): [ImageScanResult]
+  aggregateImageScanResult(filter: ImageScanResultFilter): ImageScanResultAggregateResult
+  getImageComponent(id: String!): ImageComponent
+  queryImageComponent(filter: ImageComponentFilter, order: ImageComponentOrder, first: Int, offset: Int): [ImageComponent]
+  aggregateImageComponent(filter: ImageComponentFilter): ImageComponentAggregateResult
+  getVulnerability(id: String!): Vulnerability
+  queryVulnerability(filter: VulnerabilityFilter, order: VulnerabilityOrder, first: Int, offset: Int): [Vulnerability]
+  aggregateVulnerability(filter: VulnerabilityFilter): VulnerabilityAggregateResult
+  getCWE(id: Int!): CWE
+  queryCWE(filter: CWEFilter, order: CWEOrder, first: Int, offset: Int): [CWE]
+  aggregateCWE(filter: CWEFilter): CWEAggregateResult
+}
+
+interface RBAC {
+  roles(filter: RoleFilter, order: RoleOrder, first: Int, offset: Int): [Role!]
+  rolesAggregate(filter: RoleFilter): RoleAggregateResult
+}
+
+type RBACAggregateResult {
+  count: Int
+}
+
+input RBACFilter {
+  has: [RBACHasFilter]
+  and: [RBACFilter]
+  or: [RBACFilter]
+  not: RBACFilter
+}
+
+enum RBACHasFilter {
+  roles
+}
+
+input RBACPatch {
+  roles: [RoleRef!]
+}
+
+enum RiskStatus {
+  lowrisk
+  mediumrisk
+  highrisk
+  apocalypserisk
+  inprogress
+}
+
+type Role {
+  """id is randomly assigned"""
+  id: String!
+
+  """group should be a URI format that includes a scope or realm"""
+  group: String!
+  permission: RolePermission!
+}
+
+type RoleAggregateResult {
+  count: Int
+  idMin: String
+  idMax: String
+  groupMin: String
+  groupMax: String
+}
+
+input RoleFilter {
+  id: StringHashFilter
+  group: StringHashFilter
+  permission: RolePermission_hash
+  has: [RoleHasFilter]
+  and: [RoleFilter]
+  or: [RoleFilter]
+  not: RoleFilter
+}
+
+enum RoleHasFilter {
+  id
+  group
+  permission
+}
+
+input RoleOrder {
+  asc: RoleOrderable
+  desc: RoleOrderable
+  then: RoleOrder
+}
+
+enum RoleOrderable {
+  id
+  group
+}
+
+input RolePatch {
+  """group should be a URI format that includes a scope or realm"""
+  group: String
+  permission: RolePermission
+}
+
+enum RolePermission {
+  admin
+  write
+  read
+}
+
+input RolePermission_hash {
+  eq: RolePermission
+  in: [RolePermission]
+}
+
+input RoleRef {
+  """id is randomly assigned"""
+  id: String
+
+  """group should be a URI format that includes a scope or realm"""
+  group: String
+  permission: RolePermission
+}
+
+type SchemaVersion {
+  version: String!
+}
+
+type SchemaVersionAggregateResult {
+  count: Int
+  versionMin: String
+  versionMax: String
+}
+
+input SchemaVersionFilter {
+  has: [SchemaVersionHasFilter]
+  and: [SchemaVersionFilter]
+  or: [SchemaVersionFilter]
+  not: SchemaVersionFilter
+}
+
+enum SchemaVersionHasFilter {
+  version
+}
+
+input SchemaVersionOrder {
+  asc: SchemaVersionOrderable
+  desc: SchemaVersionOrderable
+  then: SchemaVersionOrder
+}
+
+enum SchemaVersionOrderable {
+  version
+}
+
+input SchemaVersionPatch {
+  version: String
+}
+
+input SchemaVersionRef {
+  version: String
+}
+
+type SourceCodeTool {
+  id: String!
+  createdAt: DateTime!
+  scm: String!
+  repository: String!
+  branch: String!
+  headCommit: String
+  diffCommits: String
+  licenseName: String
+  visibility: String
+  parentRepo: String
+  buildTool(filter: BuildToolFilter): BuildTool!
+}
+
+type SourceCodeToolAggregateResult {
+  count: Int
+  idMin: String
+  idMax: String
+  createdAtMin: DateTime
+  createdAtMax: DateTime
+  scmMin: String
+  scmMax: String
+  repositoryMin: String
+  repositoryMax: String
+  branchMin: String
+  branchMax: String
+  headCommitMin: String
+  headCommitMax: String
+  diffCommitsMin: String
+  diffCommitsMax: String
+  licenseNameMin: String
+  licenseNameMax: String
+  visibilityMin: String
+  visibilityMax: String
+  parentRepoMin: String
+  parentRepoMax: String
+}
+
+input SourceCodeToolFilter {
+  id: StringHashFilter
+  has: [SourceCodeToolHasFilter]
+  and: [SourceCodeToolFilter]
+  or: [SourceCodeToolFilter]
+  not: SourceCodeToolFilter
+}
+
+enum SourceCodeToolHasFilter {
+  id
+  createdAt
+  scm
+  repository
+  branch
+  headCommit
+  diffCommits
+  licenseName
+  visibility
+  parentRepo
+  buildTool
+}
+
+input SourceCodeToolOrder {
+  asc: SourceCodeToolOrderable
+  desc: SourceCodeToolOrderable
+  then: SourceCodeToolOrder
+}
+
+enum SourceCodeToolOrderable {
+  id
+  createdAt
+  scm
+  repository
+  branch
+  headCommit
+  diffCommits
+  licenseName
+  visibility
+  parentRepo
+}
+
+input SourceCodeToolPatch {
+  createdAt: DateTime
+  scm: String
+  repository: String
+  branch: String
+  headCommit: String
+  diffCommits: String
+  licenseName: String
+  visibility: String
+  parentRepo: String
+  buildTool: BuildToolRef
+}
+
+input SourceCodeToolRef {
+  id: String
+  createdAt: DateTime
+  scm: String
+  repository: String
+  branch: String
+  headCommit: String
+  diffCommits: String
+  licenseName: String
+  visibility: String
+  parentRepo: String
+  buildTool: BuildToolRef
+}
+
+input StringExactFilter {
+  eq: String
+  in: [String]
+  le: String
+  lt: String
+  ge: String
+  gt: String
+  between: StringRange
+}
+
+input StringFullTextFilter {
+  alloftext: String
+  anyoftext: String
+}
+
+input StringHashFilter {
+  eq: String
+  in: [String]
+}
+
+input StringRange {
+  min: String!
+  max: String!
+}
+
+input StringRegExpFilter {
+  regexp: String
+}
+
+input StringTermFilter {
+  allofterms: String
+  anyofterms: String
+}
+
+type Subscription {
+  getOrganization(id: String!): Organization
+  queryOrganization(filter: OrganizationFilter, order: OrganizationOrder, first: Int, offset: Int): [Organization]
+  aggregateOrganization(filter: OrganizationFilter): OrganizationAggregateResult
+  getTeam(id: String!): Team
+  queryTeam(filter: TeamFilter, order: TeamOrder, first: Int, offset: Int): [Team]
+  aggregateTeam(filter: TeamFilter): TeamAggregateResult
+  getApplication(id: String!): Application
+  queryApplication(filter: ApplicationFilter, order: ApplicationOrder, first: Int, offset: Int): [Application]
+  aggregateApplication(filter: ApplicationFilter): ApplicationAggregateResult
+  getApplicationEnvironment(id: String!): ApplicationEnvironment
+  queryApplicationEnvironment(filter: ApplicationEnvironmentFilter, order: ApplicationEnvironmentOrder, first: Int, offset: Int): [ApplicationEnvironment]
+  aggregateApplicationEnvironment(filter: ApplicationEnvironmentFilter): ApplicationEnvironmentAggregateResult
+  getImageName(id: String!): ImageName
+  queryImageName(filter: ImageNameFilter, order: ImageNameOrder, first: Int, offset: Int): [ImageName]
+  aggregateImageName(filter: ImageNameFilter): ImageNameAggregateResult
+  getImageScanState(id: String!): ImageScanState
+  queryImageScanState(filter: ImageScanStateFilter, order: ImageScanStateOrder, first: Int, offset: Int): [ImageScanState]
+  aggregateImageScanState(filter: ImageScanStateFilter): ImageScanStateAggregateResult
+  getImageScanResult(id: String!): ImageScanResult
+  queryImageScanResult(filter: ImageScanResultFilter, order: ImageScanResultOrder, first: Int, offset: Int): [ImageScanResult]
+  aggregateImageScanResult(filter: ImageScanResultFilter): ImageScanResultAggregateResult
+}
+
+type Team implements RBAC {
+  """id is randomly assigned"""
+  id: String!
+  name: String!
+  roles(filter: RoleFilter, order: RoleOrder, first: Int, offset: Int): [Role!]
+  organization(filter: OrganizationFilter): Organization!
+  applications(filter: ApplicationFilter, order: ApplicationOrder, first: Int, offset: Int): [Application!]
+  labels(filter: KeyValueFilter, order: KeyValueOrder, first: Int, offset: Int): [KeyValue!]
+  rolesAggregate(filter: RoleFilter): RoleAggregateResult
+  applicationsAggregate(filter: ApplicationFilter): ApplicationAggregateResult
+  labelsAggregate(filter: KeyValueFilter): KeyValueAggregateResult
+}
+
+type TeamAggregateResult {
+  count: Int
+  idMin: String
+  idMax: String
+  nameMin: String
+  nameMax: String
+}
+
+input TeamFilter {
+  id: StringHashFilter
+  name: StringExactFilter
+  has: [TeamHasFilter]
+  and: [TeamFilter]
+  or: [TeamFilter]
+  not: TeamFilter
+}
+
+enum TeamHasFilter {
+  id
+  name
+  roles
+  organization
+  applications
+  labels
+}
+
+input TeamOrder {
+  asc: TeamOrderable
+  desc: TeamOrderable
+  then: TeamOrder
+}
+
+enum TeamOrderable {
+  id
+  name
+}
+
+input TeamPatch {
+  name: String
+  roles: [RoleRef!]
+  organization: OrganizationRef
+  applications: [ApplicationRef!]
+  labels: [KeyValueRef!]
+}
+
+input TeamRef {
+  """id is randomly assigned"""
+  id: String
+  name: String
+  roles: [RoleRef!]
+  organization: OrganizationRef
+  applications: [ApplicationRef!]
+  labels: [KeyValueRef!]
+}
+
+"""ToolInfo describes the tool that was used to perform a scan."""
+type ToolInfo {
+  """id is randomly assigned"""
+  id: String!
+  name: String!
+  vendor: String
+  version: String
+}
+
+type ToolInfoAggregateResult {
+  count: Int
+  idMin: String
+  idMax: String
+  nameMin: String
+  nameMax: String
+  vendorMin: String
+  vendorMax: String
+  versionMin: String
+  versionMax: String
+}
+
+input ToolInfoFilter {
+  id: StringHashFilter
+  has: [ToolInfoHasFilter]
+  and: [ToolInfoFilter]
+  or: [ToolInfoFilter]
+  not: ToolInfoFilter
+}
+
+enum ToolInfoHasFilter {
+  id
+  name
+  vendor
+  version
+}
+
+input ToolInfoOrder {
+  asc: ToolInfoOrderable
+  desc: ToolInfoOrderable
+  then: ToolInfoOrder
+}
+
+enum ToolInfoOrderable {
+  id
+  name
+  vendor
+  version
+}
+
+input ToolInfoPatch {
+  name: String
+  vendor: String
+  version: String
+}
+
+input ToolInfoRef {
+  """id is randomly assigned"""
+  id: String
+  name: String
+  vendor: String
+  version: String
+}
+
+input UpdateApplicationComponentInput {
+  filter: ApplicationComponentFilter!
+  set: ApplicationComponentPatch
+  remove: ApplicationComponentPatch
+}
+
+type UpdateApplicationComponentPayload {
+  applicationComponent(filter: ApplicationComponentFilter, order: ApplicationComponentOrder, first: Int, offset: Int): [ApplicationComponent]
+  numUids: Int
+}
+
+input UpdateApplicationDeploymentInput {
+  filter: ApplicationDeploymentFilter!
+  set: ApplicationDeploymentPatch
+  remove: ApplicationDeploymentPatch
+}
+
+type UpdateApplicationDeploymentPayload {
+  applicationDeployment(filter: ApplicationDeploymentFilter, order: ApplicationDeploymentOrder, first: Int, offset: Int): [ApplicationDeployment]
+  numUids: Int
+}
+
+input UpdateApplicationDeploymentRiskInput {
+  filter: ApplicationDeploymentRiskFilter!
+  set: ApplicationDeploymentRiskPatch
+  remove: ApplicationDeploymentRiskPatch
+}
+
+type UpdateApplicationDeploymentRiskPayload {
+  applicationDeploymentRisk(filter: ApplicationDeploymentRiskFilter, order: ApplicationDeploymentRiskOrder, first: Int, offset: Int): [ApplicationDeploymentRisk]
+  numUids: Int
+}
+
+input UpdateApplicationEnvironmentInput {
+  filter: ApplicationEnvironmentFilter!
+  set: ApplicationEnvironmentPatch
+  remove: ApplicationEnvironmentPatch
+}
+
+type UpdateApplicationEnvironmentPayload {
+  applicationEnvironment(filter: ApplicationEnvironmentFilter, order: ApplicationEnvironmentOrder, first: Int, offset: Int): [ApplicationEnvironment]
+  numUids: Int
+}
+
+input UpdateApplicationInput {
+  filter: ApplicationFilter!
+  set: ApplicationPatch
+  remove: ApplicationPatch
+}
+
+type UpdateApplicationPayload {
+  application(filter: ApplicationFilter, order: ApplicationOrder, first: Int, offset: Int): [Application]
+  numUids: Int
+}
+
+input UpdateApplicationRiskStatusInput {
+  filter: ApplicationRiskStatusFilter!
+  set: ApplicationRiskStatusPatch
+  remove: ApplicationRiskStatusPatch
+}
+
+type UpdateApplicationRiskStatusPayload {
+  applicationRiskStatus(filter: ApplicationRiskStatusFilter, order: ApplicationRiskStatusOrder, first: Int, offset: Int): [ApplicationRiskStatus]
+  numUids: Int
+}
+
+input UpdateBuildToolInput {
+  filter: BuildToolFilter!
+  set: BuildToolPatch
+  remove: BuildToolPatch
+}
+
+type UpdateBuildToolPayload {
+  buildTool(filter: BuildToolFilter, order: BuildToolOrder, first: Int, offset: Int): [BuildTool]
+  numUids: Int
+}
+
+input UpdateCommitMetaDataInput {
+  filter: CommitMetaDataFilter!
+  set: CommitMetaDataPatch
+  remove: CommitMetaDataPatch
+}
+
+type UpdateCommitMetaDataPayload {
+  commitMetaData(filter: CommitMetaDataFilter, order: CommitMetaDataOrder, first: Int, offset: Int): [CommitMetaData]
+  numUids: Int
+}
+
+input UpdateCWEInput {
+  filter: CWEFilter!
+  set: CWEPatch
+  remove: CWEPatch
+}
+
+type UpdateCWEPayload {
+  cWE(filter: CWEFilter, order: CWEOrder, first: Int, offset: Int): [CWE]
+  numUids: Int
+}
+
+input UpdateDeploymentTargetInput {
+  filter: DeploymentTargetFilter!
+  set: DeploymentTargetPatch
+  remove: DeploymentTargetPatch
+}
+
+type UpdateDeploymentTargetPayload {
+  deploymentTarget(filter: DeploymentTargetFilter, order: DeploymentTargetOrder, first: Int, offset: Int): [DeploymentTarget]
+  numUids: Int
+}
+
+input UpdateImageComponentInput {
+  filter: ImageComponentFilter!
+  set: ImageComponentPatch
+  remove: ImageComponentPatch
+}
+
+type UpdateImageComponentPayload {
+  imageComponent(filter: ImageComponentFilter, order: ImageComponentOrder, first: Int, offset: Int): [ImageComponent]
+  numUids: Int
+}
+
+input UpdateImageIndexInput {
+  filter: ImageIndexFilter!
+  set: ImageIndexPatch
+  remove: ImageIndexPatch
+}
+
+type UpdateImageIndexPayload {
+  imageIndex(filter: ImageIndexFilter, order: ImageIndexOrder, first: Int, offset: Int): [ImageIndex]
+  numUids: Int
+}
+
+input UpdateImageInput {
+  filter: ImageFilter!
+  set: ImagePatch
+  remove: ImagePatch
+}
+
+input UpdateImageNameInput {
+  filter: ImageNameFilter!
+  set: ImageNamePatch
+  remove: ImageNamePatch
+}
+
+type UpdateImageNamePayload {
+  imageName(filter: ImageNameFilter, order: ImageNameOrder, first: Int, offset: Int): [ImageName]
+  numUids: Int
+}
+
+type UpdateImagePayload {
+  image(filter: ImageFilter, order: ImageOrder, first: Int, offset: Int): [Image]
+  numUids: Int
+}
+
+input UpdateImageScanResultInput {
+  filter: ImageScanResultFilter!
+  set: ImageScanResultPatch
+  remove: ImageScanResultPatch
+}
+
+type UpdateImageScanResultPayload {
+  imageScanResult(filter: ImageScanResultFilter, order: ImageScanResultOrder, first: Int, offset: Int): [ImageScanResult]
+  numUids: Int
+}
+
+input UpdateImageScanStateInput {
+  filter: ImageScanStateFilter!
+  set: ImageScanStatePatch
+  remove: ImageScanStatePatch
+}
+
+type UpdateImageScanStatePayload {
+  imageScanState(filter: ImageScanStateFilter, order: ImageScanStateOrder, first: Int, offset: Int): [ImageScanState]
+  numUids: Int
+}
+
+input UpdateKeyValueInput {
+  filter: KeyValueFilter!
+  set: KeyValuePatch
+  remove: KeyValuePatch
+}
+
+type UpdateKeyValuePayload {
+  keyValue(filter: KeyValueFilter, order: KeyValueOrder, first: Int, offset: Int): [KeyValue]
+  numUids: Int
+}
+
+input UpdateOrganizationInput {
+  filter: OrganizationFilter!
+  set: OrganizationPatch
+  remove: OrganizationPatch
+}
+
+type UpdateOrganizationPayload {
+  organization(filter: OrganizationFilter, order: OrganizationOrder, first: Int, offset: Int): [Organization]
+  numUids: Int
+}
+
+input UpdateRBACInput {
+  filter: RBACFilter!
+  set: RBACPatch
+  remove: RBACPatch
+}
+
+type UpdateRBACPayload {
+  rBAC(filter: RBACFilter, first: Int, offset: Int): [RBAC]
+  numUids: Int
+}
+
+input UpdateRoleInput {
+  filter: RoleFilter!
+  set: RolePatch
+  remove: RolePatch
+}
+
+type UpdateRolePayload {
+  role(filter: RoleFilter, order: RoleOrder, first: Int, offset: Int): [Role]
+  numUids: Int
+}
+
+input UpdateSchemaVersionInput {
+  filter: SchemaVersionFilter!
+  set: SchemaVersionPatch
+  remove: SchemaVersionPatch
+}
+
+type UpdateSchemaVersionPayload {
+  schemaVersion(filter: SchemaVersionFilter, order: SchemaVersionOrder, first: Int, offset: Int): [SchemaVersion]
+  numUids: Int
+}
+
+input UpdateSourceCodeToolInput {
+  filter: SourceCodeToolFilter!
+  set: SourceCodeToolPatch
+  remove: SourceCodeToolPatch
+}
+
+type UpdateSourceCodeToolPayload {
+  sourceCodeTool(filter: SourceCodeToolFilter, order: SourceCodeToolOrder, first: Int, offset: Int): [SourceCodeTool]
+  numUids: Int
+}
+
+input UpdateTeamInput {
+  filter: TeamFilter!
+  set: TeamPatch
+  remove: TeamPatch
+}
+
+type UpdateTeamPayload {
+  team(filter: TeamFilter, order: TeamOrder, first: Int, offset: Int): [Team]
+  numUids: Int
+}
+
+input UpdateToolInfoInput {
+  filter: ToolInfoFilter!
+  set: ToolInfoPatch
+  remove: ToolInfoPatch
+}
+
+type UpdateToolInfoPayload {
+  toolInfo(filter: ToolInfoFilter, order: ToolInfoOrder, first: Int, offset: Int): [ToolInfo]
+  numUids: Int
+}
+
+input UpdateVulnerabilityInput {
+  filter: VulnerabilityFilter!
+  set: VulnerabilityPatch
+  remove: VulnerabilityPatch
+}
+
+type UpdateVulnerabilityPayload {
+  vulnerability(filter: VulnerabilityFilter, order: VulnerabilityOrder, first: Int, offset: Int): [Vulnerability]
+  numUids: Int
+}
+
+type Vulnerability {
+  """id is randomly assigned"""
+  id: String!
+
+  """namespace where the vulnerability comes from"""
+  namespace: String
+
+  """id within that namespace"""
+  namespaceId: String
+
+  """NVD CVE reference"""
+  nvdid: String
+  ratings: [VulnerabilitySeverity!]
+  cwes(filter: CWEFilter, order: CWEOrder, first: Int, offset: Int): [CWE!]
+  description: String
+  detail: String
+  recommendation: String
+  advisoryURLs: [String!]
+  components(filter: ImageComponentFilter, order: ImageComponentOrder, first: Int, offset: Int): [ImageComponent!]
+  cwesAggregate(filter: CWEFilter): CWEAggregateResult
+  componentsAggregate(filter: ImageComponentFilter): ImageComponentAggregateResult
+}
+
+type VulnerabilityAggregateResult {
+  count: Int
+  idMin: String
+  idMax: String
+  namespaceMin: String
+  namespaceMax: String
+  namespaceIdMin: String
+  namespaceIdMax: String
+  nvdidMin: String
+  nvdidMax: String
+  descriptionMin: String
+  descriptionMax: String
+  detailMin: String
+  detailMax: String
+  recommendationMin: String
+  recommendationMax: String
+}
+
+input VulnerabilityFilter {
+  id: StringHashFilter
+  namespaceId: StringExactFilter
+  nvdid: StringExactFilter
+  ratings: VulnerabilitySeverity_exact
+  has: [VulnerabilityHasFilter]
+  and: [VulnerabilityFilter]
+  or: [VulnerabilityFilter]
+  not: VulnerabilityFilter
+}
+
+enum VulnerabilityHasFilter {
+  id
+  namespace
+  namespaceId
+  nvdid
+  ratings
+  cwes
+  description
+  detail
+  recommendation
+  advisoryURLs
+  components
+}
+
+input VulnerabilityOrder {
+  asc: VulnerabilityOrderable
+  desc: VulnerabilityOrderable
+  then: VulnerabilityOrder
+}
+
+enum VulnerabilityOrderable {
+  id
+  namespace
+  namespaceId
+  nvdid
+  description
+  detail
+  recommendation
+}
+
+input VulnerabilityPatch {
+  """namespace where the vulnerability comes from"""
+  namespace: String
+
+  """id within that namespace"""
+  namespaceId: String
+
+  """NVD CVE reference"""
+  nvdid: String
+  ratings: [VulnerabilitySeverity!]
+  cwes: [CWERef!]
+  description: String
+  detail: String
+  recommendation: String
+  advisoryURLs: [String!]
+  components: [ImageComponentRef!]
+}
+
+input VulnerabilityRef {
+  """id is randomly assigned"""
+  id: String
+
+  """namespace where the vulnerability comes from"""
+  namespace: String
+
+  """id within that namespace"""
+  namespaceId: String
+
+  """NVD CVE reference"""
+  nvdid: String
+  ratings: [VulnerabilitySeverity!]
+  cwes: [CWERef!]
+  description: String
+  detail: String
+  recommendation: String
+  advisoryURLs: [String!]
+  components: [ImageComponentRef!]
+}
+
+enum VulnerabilitySeverity {
+  critical
+  high
+  medium
+  low
+  info
+  none
+  unknown
+}
+
+input VulnerabilitySeverity_exact {
+  eq: VulnerabilitySeverity
+  in: [VulnerabilitySeverity]
+  le: VulnerabilitySeverity
+  lt: VulnerabilitySeverity
+  ge: VulnerabilitySeverity
+  gt: VulnerabilitySeverity
+  between: VulnerabilitySeverity
+}
+
+input WithinFilter {
+  polygon: PolygonRef!
+}
+

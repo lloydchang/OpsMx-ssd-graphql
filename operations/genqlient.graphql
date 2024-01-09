@@ -1,0 +1,147 @@
+# Organisation related queries/mutations
+query GetOrganization($id: String!) {
+    getOrganization(id: $id) {
+        id
+        name
+    }
+}
+
+mutation AddOrganization($input: AddOrganizationInput!) {
+    addOrganization(input: [$input], upsert: true) {
+        numUids
+        organization {
+            id
+            name
+        }
+    }
+}
+
+# DeploymentTarget related queries/mutations
+mutation AddDeploymentTarget($input: AddDeploymentTargetInput!) {
+    addDeploymentTarget(input: [$input], upsert: true) {
+        numUids
+        deploymentTarget {
+            id
+            name
+        }
+    }
+}
+
+# Team related queries/mutations
+mutation AddTeam($input: AddTeamInput!) {
+    addTeam(input: [$input], upsert: true) {
+        numUids
+        team {
+            id
+            name
+        }
+    }
+}
+
+mutation AddImageName($input: AddImageNameInput!) {
+    addImageName(input: [$input], upsert: true) {
+        numUids
+        imageName {
+            id
+        }
+    }
+}
+
+mutation LinkImageIndexToName($imageNameId: String!, $imageIndexId: String!) {
+    updateImageName(input: {
+        filter: { id: {eq: $imageNameId} },
+        set: { imageIndexes: [ { id: $imageIndexId }]}
+    })
+    {
+        numUids
+    }
+}
+
+query GetImageIndexAndImages($id: String!) {
+  getImageIndex(id: $id) {
+    images {
+      digest
+      platform
+    }
+  }
+}
+
+mutation AddImageIndex($input: AddImageIndexInput!) {
+    addImageIndex(input: [$input], upsert: true) {
+        numUids
+        imageIndex {
+            id
+        }
+    }
+}
+
+mutation AddImage($imageId: String!, $imageIndexId: String!, $input: AddImageInput!) {
+    addImage(input: [$input], upsert: true) {
+        image {
+            id
+        }
+    }
+    updateImage(input: {
+        filter: { id: {eq: $imageId} },
+        set: { imageIndexes: [ { id: $imageIndexId }]}
+    })
+    {
+        numUids
+    }
+}
+
+mutation AddImageScanState($imageScanStateId: String!, $imageId: String!, $input: AddImageScanStateInput!) {
+    addImageScanState(input: [$input]) {
+        imageScanState {
+            id
+        }
+    }
+    updateImageScanState(input: {
+        filter: { id: { eq: $imageScanStateId }},
+        set: {image: { id: $imageId }}
+    }) {
+        numUids
+    }
+}
+
+mutation SetImageScanState(
+    $scanStateId: String!,
+    $status: ImageScanStateStatus!,
+    $now: DateTime!
+) {
+    updateImageScanState(input: {filter: {id: {eq: $scanStateId}}, set: {
+        status: $status
+        updatedAt: $now
+    }}) {
+        numUids
+    }
+}
+
+query ValidateRequestQuery($id: String!) {
+    getImageScanState(id: $id) {
+        status
+        image {
+            id
+            imageIndexes {
+                imageNames {
+                    name
+                }
+            }
+        }
+    }
+}
+
+mutation AddScan(
+    $scanResult: AddImageScanResultInput!,
+    $scanStateId: String!,
+    $scanState: ImageScanStatePatch!
+) {
+    addImageScanResult(input: [$scanResult]) {
+        imageScanResult {
+            id
+        }
+    }
+    updateImageScanState(input: {filter: {id: {eq: $scanStateId}}, set: $scanState}) {
+        numUids
+    }
+}

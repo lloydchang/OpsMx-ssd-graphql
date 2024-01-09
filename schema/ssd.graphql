@@ -1,0 +1,433 @@
+type SchemaVersion {
+    version: String!
+}
+
+interface RBAC {
+    roles: [Role!]
+}
+
+enum RolePermission {
+    admin
+    write
+    read
+}
+
+type Role {
+    "id is randomly assigned"
+    id: String! @id
+    "group should be a URI format that includes a scope or realm"
+    group: String! @search(by: [hash])
+    permission: RolePermission! @search(by: [hash])
+}
+
+"""
+KeyValue is a generic key/value pair, used as an attribute list or similar.
+"""
+type KeyValue {
+    name: String!
+    value: String!
+}
+
+"""
+DeploymentTarget describes a single place that things can be deployed into,
+such as an AWS account or a Kubernetes cluster.
+"""
+type DeploymentTarget
+    @auth(
+    add: {
+        or: [
+            { rule: "{$OpsMxSuperadmin: {eq: true}}" },
+            @opsmxAuthRule(var=$OpsMxGroups base=queryDeploymentTarget path=organization permissions=admin)
+    ]},
+    update: {
+        or: [
+            { rule: "{$OpsMxSuperadmin: {eq: true}}" },
+            @opsmxAuthRule(var=$OpsMxGroups base=queryDeploymentTarget path=organization permissions=admin)
+    ]},
+    delete: 
+            { rule: "{$OpsMxSuperadmin: {eq: true}}" }
+            )
+{
+    "id is randomly assigned"
+    id: String! @id
+    name: String! @search(by: [exact])
+    organization: Organization! @hasInverse(field: environments)
+}
+
+type Organization implements RBAC
+    @withSubscription
+    @auth(
+    query: {
+        or: [
+            { rule: "{$OpsMxSuperadmin: {eq: true}}" },
+            @opsmxAuthRule(var=$OpsMxGroups base=queryOrganization permissions=admin,read,write)
+    ]},
+    add: {
+        or: [
+            { rule: "{$OpsMxSuperadmin: {eq: true}}" },
+            @opsmxAuthRule(var=$OpsMxGroups base=queryOrganization permissions=admin)
+    ]},
+    update: {
+        or: [
+            { rule: "{$OpsMxSuperadmin: {eq: true}}" },
+            @opsmxAuthRule(var=$OpsMxGroups base=queryOrganization permissions=admin)
+    ]},
+    delete: 
+            { rule: "{$OpsMxSuperadmin: {eq: true}}" }
+            )
+{
+    "id is randomly assigned"
+    id: String! @id
+    name: String! @search(by: [exact])
+    roles: [Role!]
+    teams: [Team!] @hasInverse(field: organization)
+    environments: [DeploymentTarget!] @hasInverse(field: organization)
+}
+
+type Team implements RBAC
+    @withSubscription
+    @auth(
+    query: {
+        or: [
+            { rule: "{$OpsMxSuperadmin: {eq: true}}" },
+            @opsmxAuthRule(var=$OpsMxGroups base=queryTeam permissions=admin,read,write)
+            @opsmxAuthRule(var=$OpsMxGroups base=queryTeam path=organization permissions=admin,read)
+    ]},
+    add: {
+        or: [
+            { rule: "{$OpsMxSuperadmin: {eq: true}}" },
+            @opsmxAuthRule(var=$OpsMxGroups base=queryTeam permissions=admin)
+            @opsmxAuthRule(var=$OpsMxGroups base=queryTeam path=organization permissions=admin)
+    ]},
+    update: {
+        or: [
+            { rule: "{$OpsMxSuperadmin: {eq: true}}" },
+            @opsmxAuthRule(var=$OpsMxGroups base=queryTeam permissions=admin)
+            @opsmxAuthRule(var=$OpsMxGroups base=queryTeam path=organization permissions=admin)
+    ]},
+    delete: 
+            { rule: "{$OpsMxSuperadmin: {eq: true}}" }
+    )
+{
+    "id is randomly assigned"
+    id: String! @id
+    name: String! @search(by: [exact])
+    roles: [Role!]
+    organization: Organization! @hasInverse(field: teams)
+    applications: [Application!]
+    labels: [KeyValue!]
+}
+
+type Application implements RBAC
+    @withSubscription
+    @auth(
+    query: {
+        or: [
+            { rule: "{$OpsMxSuperadmin: {eq: true}}" },
+            @opsmxAuthRule(var=$OpsMxGroups base=queryApplication permissions=admin,read,write)
+            @opsmxAuthRule(var=$OpsMxGroups base=queryApplication path=team permissions=admin,read,write)
+            @opsmxAuthRule(var=$OpsMxGroups base=queryApplication path=team,organization permissions=admin,read)
+    ]},
+    add: {
+        or: [
+            { rule: "{$OpsMxSuperadmin: {eq: true}}" },
+            @opsmxAuthRule(var=$OpsMxGroups base=queryApplication permissions=admin)
+            @opsmxAuthRule(var=$OpsMxGroups base=queryApplication path=team permissions=admin)
+            @opsmxAuthRule(var=$OpsMxGroups base=queryApplication path=team,organization permissions=admin)
+    ]},
+    update: {
+        or: [
+            { rule: "{$OpsMxSuperadmin: {eq: true}}" },
+            @opsmxAuthRule(var=$OpsMxGroups base=queryApplication permissions=admin)
+            @opsmxAuthRule(var=$OpsMxGroups base=queryApplication path=team permissions=admin)
+            @opsmxAuthRule(var=$OpsMxGroups base=queryApplication path=team,organization permissions=admin)
+    ]},
+    delete: 
+        { rule: "{$OpsMxSuperadmin: {eq: true}}" }
+            )
+{
+    "id is randomly assigned"
+    id: String! @id
+    name: String! @search(by: [exact])
+    roles: [Role!]
+    environments: [ApplicationEnvironment!] @hasInverse(field: application)
+    team: Team! @hasInverse(field: applications)
+}
+
+type ApplicationEnvironment @withSubscription {
+    "id is randomly assigned"
+    id: String! @id
+    type: String! @search(by: [exact])
+    application: Application!
+    deploymentTarget: DeploymentTarget!
+    namespace: String!
+    toolsUsed: String
+    components: [ApplicationComponent!]
+    riskStatus: ApplicationRiskStatus @hasInverse(field: applicationEnvironment)
+}
+
+enum RiskStatus {
+    lowrisk
+    mediumrisk
+    highrisk
+    apocalypserisk
+    inprogress
+}
+
+type ApplicationRiskStatus {
+    id: String! @id
+    riskStatus: RiskStatus
+    sourceCodeAlerts: Int
+    buildAlerts: Int
+    artifactAlerts: Int
+    deploymentAlerts: Int
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    applicationEnvironment: ApplicationEnvironment!
+}
+
+type ApplicationComponent {
+    "id is randomly assigned"
+    id: String! @id
+    name: String! @search(by: [exact])
+    applicationEnvironment: ApplicationEnvironment! @hasInverse(field: components)
+    deployments: [ApplicationDeployment!] @hasInverse(field: component)
+}
+
+enum DeploymentStage {
+    discovered
+    current
+    previous
+    blocked
+}
+
+"TODO: consider types of deployments:  helm, argo, etc"
+type ApplicationDeployment {
+    "id is randomly assigned"
+    id: String! @id
+    image: [Image!] @hasInverse(field: deployments)
+    component: ApplicationComponent!
+    deployedAt: DateTime
+    deploymentStage: DeploymentStage!
+    source: String!
+    deployedBy: String
+    toolsUsed: String
+    deploymentRisk: ApplicationDeploymentRisk @hasInverse(field: applicationDeployment)
+}
+
+type ApplicationDeploymentRisk {
+    id: String! @id
+    sourceCodeAlertsScore: Int
+    buildAlertsScore: Int
+    artifactAlertsScore: Int
+    deploymentAlertsScore: Int
+    imageRiskStatus: RiskStatus
+    createdAt: DateTime!
+    applicationDeployment: ApplicationDeployment!
+}
+
+type BuildTool {
+    id: String! @id
+    buildId: String! @search(by: [exact])
+    tool: String!
+    buildName: String
+    buildUrl: String!
+    image: String! @search(by: [exact])
+    digest: String!
+    imageName: ImageName 
+    buildTime: DateTime
+    buildUser: String
+    sourceCodeTool: SourceCodeTool! @hasInverse(field: buildTool)
+    commitMetaData: CommitMetaData @hasInverse(field: buildTool)
+    createdAt: DateTime!
+}
+
+type SourceCodeTool {
+    id: String! @id
+    createdAt: DateTime!
+    scm: String!
+    repository: String!
+    branch: String!
+    headCommit: String
+    diffCommits: String
+    licenseName: String
+    visibility: String
+    parentRepo: String
+    buildTool: BuildTool! 
+}
+
+type CommitMetaData {
+    id: String! @id
+    commit: String
+    repository: String
+    commitSign: String
+    noOfReviewersConf: String
+    reviewerList: String
+    approverList: String
+    buildTool: BuildTool! 
+}
+
+type ImageName @withSubscription {
+    "id is the name and ownership hashed."
+    id: String! @id
+    organization: Organization
+    "Name is the base name of the image, such as 'docker.io/library/fooimage'"
+    name: String! @search(by: [exact])
+    "List of indexes associated with this name"
+    imageIndexes: [ImageIndex!] @hasInverse(field: imageNames)
+    createdAt: DateTime!
+}
+
+"""
+ImageIndex holds the association between an ImageName and a specific list of images,
+each of which will have a platform (hopefully) and a unique digest.
+
+ImageIndex also has a list of deployments, which indicate where this image is currently
+in use.
+"""
+type ImageIndex {
+    "id is a hash of the image index's digest and ownership."
+    id: String! @id
+    "Digest is the image index's digest, or the image digest if it not an index"
+    digest: String!
+    organization: Organization
+    "A pointer to the images this index is known by"
+    imageNames: [ImageName!] @hasInverse(field: imageIndexes)
+    "Images which are part of this index"
+    images: [Image!] @hasInverse(field: imageIndexes)
+    createdAt: DateTime!
+}
+
+"""
+Image holds a specific deployable image, with a platform.  This is the underlying object
+that is scanned by security scanners.  It may also be what is deployed, but generally
+these are found indrectly through the ImageIndex, with a platform filter.
+"""
+type Image {
+    "id is a hash of the image's digest and ownership."
+    id: String! @id
+    "Digest is the image's digest"
+    digest: String!
+    organization: Organization
+    "Indexes where this image is included"
+    imageIndexes: [ImageIndex!] @hasInverse(field: images)
+    "docker platform string, e.g. linux/arm64/v8 or linux/amd64 or linux/arm64"
+    platform: String
+    "scans contains the list of scans that are pending or completed."
+    deployments: [ApplicationDeployment!] @hasInverse(field: image)
+    scans: [ImageScanState!] @hasInverse(field: image)
+    createdAt: DateTime!
+}
+
+"""
+ToolInfo describes the tool that was used to perform a scan.
+"""
+type ToolInfo {
+    "id is randomly assigned"
+    id: String! @id
+    name: String!
+    vendor: String
+    version: String
+}
+
+"""
+ImageScanState holds the status of a scan request, which indicates that a scan is
+in progress, completed, or failed.  
+"""
+type ImageScanState @withSubscription {
+    "id is randomly assigned"
+    id: String! @id
+    "image points to the specific image we are scanning"
+    image: Image @hasInverse(field: scans)
+    "tools describes the tools used to process this scan"
+    tools: [ToolInfo!]
+    "databaseVersions holds the version and other metadata about the vuln or other database"
+    databaseVersions: [KeyValue!]
+    "status of the scan"
+    status: ImageScanStateStatus! @search(by: [exact])
+    """
+    statusReason may hold a human-readable reason for the current state.  This is generally
+    only updated for 'error' status, where providing additional reasons for the failure
+    to a user or admin would help.
+    """
+    statusReason: String
+    "the result of the scan"
+    result: ImageScanResult
+    updatedAt: DateTime!
+    createdAt: DateTime!
+}
+
+enum ImageScanStateStatus {
+    "The image scan has been started, but is not yet complete"
+    pending
+    "The image scan is currently in progress"
+    running
+    "the image scan is complete and results are available"
+    complete
+    "the image scan failed for some reason, and no further work will be performed on this scan"
+    error
+}
+
+type ImageScanResult @withSubscription {
+    "id is randomly assigned"
+    id: String! @id
+    imageScanState: ImageScanState!
+    components: [ImageComponent!] @hasInverse(field: imageScanResult)
+    vulnCriticalCount: Int! @search
+    vulnHighCount: Int! @search
+    vulnMediumCount: Int! @search
+    vulnLowCount: Int! @search
+    vulnInfoCount: Int! @search
+    vulnUnknownCount: Int! @search
+    vulnNoneCount: Int! @search
+    vulnTotalCount: Int! @search
+    createdAt: DateTime!
+}
+
+type ImageComponent {
+    "id is randomly assigned"
+    id: String! @id
+    type: String!
+    name: String! @search(by: [exact])
+    version: String!
+    licenses: [String!]
+    purl: String @search(by: [exact])
+    cpe: String @search(by: [exact])
+    vulnerabilities: [Vulnerability!] @hasInverse(field: components)
+    imageScanResult: ImageScanResult @hasInverse(field: components)
+}
+
+enum VulnerabilitySeverity {
+    critical
+    high
+    medium
+    low
+    info
+    none
+    unknown
+}
+
+type Vulnerability {
+    "id is randomly assigned"
+    id: String! @id
+    "namespace where the vulnerability comes from"
+    namespace: String
+    "id within that namespace"
+    namespaceId: String @search(by: [exact])
+    "NVD CVE reference"
+    nvdid: String @search(by: [exact])
+    ratings: [VulnerabilitySeverity!] @search(by: [exact])
+    cwes: [CWE!]
+    description: String
+    detail: String
+    recommendation: String
+    advisoryURLs: [String!]
+    components: [ImageComponent!] @hasInverse(field: vulnerabilities)
+}
+
+type CWE {
+    "id is the CWE id, which is assigned from an anthority"
+    id: Int! @id
+    name: String!
+    description: String!
+}
