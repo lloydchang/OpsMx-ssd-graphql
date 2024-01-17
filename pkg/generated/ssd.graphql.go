@@ -50,6 +50,7 @@ type AddDeploymentTargetInput struct {
 	// id is randomly assigned
 	Id           string           `json:"id"`
 	Name         string           `json:"name"`
+	IsFirewall   bool             `json:"isFirewall"`
 	Organization *OrganizationRef `json:"organization,omitempty"`
 }
 
@@ -58,6 +59,9 @@ func (v *AddDeploymentTargetInput) GetId() string { return v.Id }
 
 // GetName returns AddDeploymentTargetInput.Name, and is useful for accessing the field via an interface.
 func (v *AddDeploymentTargetInput) GetName() string { return v.Name }
+
+// GetIsFirewall returns AddDeploymentTargetInput.IsFirewall, and is useful for accessing the field via an interface.
+func (v *AddDeploymentTargetInput) GetIsFirewall() bool { return v.IsFirewall }
 
 // GetOrganization returns AddDeploymentTargetInput.Organization, and is useful for accessing the field via an interface.
 func (v *AddDeploymentTargetInput) GetOrganization() *OrganizationRef { return v.Organization }
@@ -834,6 +838,7 @@ type DeploymentTargetRef struct {
 	// id is randomly assigned
 	Id           string           `json:"id"`
 	Name         string           `json:"name"`
+	IsFirewall   bool             `json:"isFirewall"`
 	Organization *OrganizationRef `json:"organization,omitempty"`
 }
 
@@ -842,6 +847,9 @@ func (v *DeploymentTargetRef) GetId() string { return v.Id }
 
 // GetName returns DeploymentTargetRef.Name, and is useful for accessing the field via an interface.
 func (v *DeploymentTargetRef) GetName() string { return v.Name }
+
+// GetIsFirewall returns DeploymentTargetRef.IsFirewall, and is useful for accessing the field via an interface.
+func (v *DeploymentTargetRef) GetIsFirewall() bool { return v.IsFirewall }
 
 // GetOrganization returns DeploymentTargetRef.Organization, and is useful for accessing the field via an interface.
 func (v *DeploymentTargetRef) GetOrganization() *OrganizationRef { return v.Organization }
@@ -1251,6 +1259,29 @@ func (v *OrganizationRef) GetTeams() []*TeamRef { return v.Teams }
 // GetEnvironments returns OrganizationRef.Environments, and is useful for accessing the field via an interface.
 func (v *OrganizationRef) GetEnvironments() []*DeploymentTargetRef { return v.Environments }
 
+// QueryOrganizationByNameQueryOrganization includes the requested fields of the GraphQL type Organization.
+type QueryOrganizationByNameQueryOrganization struct {
+	// id is randomly assigned
+	Id   string `json:"id"`
+	Name string `json:"name"`
+}
+
+// GetId returns QueryOrganizationByNameQueryOrganization.Id, and is useful for accessing the field via an interface.
+func (v *QueryOrganizationByNameQueryOrganization) GetId() string { return v.Id }
+
+// GetName returns QueryOrganizationByNameQueryOrganization.Name, and is useful for accessing the field via an interface.
+func (v *QueryOrganizationByNameQueryOrganization) GetName() string { return v.Name }
+
+// QueryOrganizationByNameResponse is returned by QueryOrganizationByName on success.
+type QueryOrganizationByNameResponse struct {
+	QueryOrganization []*QueryOrganizationByNameQueryOrganization `json:"queryOrganization"`
+}
+
+// GetQueryOrganization returns QueryOrganizationByNameResponse.QueryOrganization, and is useful for accessing the field via an interface.
+func (v *QueryOrganizationByNameResponse) GetQueryOrganization() []*QueryOrganizationByNameQueryOrganization {
+	return v.QueryOrganization
+}
+
 type RiskStatus string
 
 const (
@@ -1612,6 +1643,14 @@ func (v *__LinkImageIndexToNameInput) GetImageNameId() string { return v.ImageNa
 
 // GetImageIndexId returns __LinkImageIndexToNameInput.ImageIndexId, and is useful for accessing the field via an interface.
 func (v *__LinkImageIndexToNameInput) GetImageIndexId() string { return v.ImageIndexId }
+
+// __QueryOrganizationByNameInput is used internally by genqlient
+type __QueryOrganizationByNameInput struct {
+	Input string `json:"input"`
+}
+
+// GetInput returns __QueryOrganizationByNameInput.Input, and is useful for accessing the field via an interface.
+func (v *__QueryOrganizationByNameInput) GetInput() string { return v.Input }
 
 // __SetImageScanStateInput is used internally by genqlient
 type __SetImageScanStateInput struct {
@@ -2065,6 +2104,42 @@ func LinkImageIndexToName(
 	var err error
 
 	var data LinkImageIndexToNameResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by QueryOrganizationByName.
+const QueryOrganizationByName_Operation = `
+query QueryOrganizationByName ($input: String!) {
+	queryOrganization(filter: {name:{eq:$input}}) {
+		id
+		name
+	}
+}
+`
+
+func QueryOrganizationByName(
+	ctx context.Context,
+	client graphql.Client,
+	input string,
+) (*QueryOrganizationByNameResponse, error) {
+	req := &graphql.Request{
+		OpName: "QueryOrganizationByName",
+		Query:  QueryOrganizationByName_Operation,
+		Variables: &__QueryOrganizationByNameInput{
+			Input: input,
+		},
+	}
+	var err error
+
+	var data QueryOrganizationByNameResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(

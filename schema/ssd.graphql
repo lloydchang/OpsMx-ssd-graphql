@@ -34,6 +34,11 @@ such as an AWS account or a Kubernetes cluster.
 """
 type DeploymentTarget
     @auth(
+    query: {
+        or: [
+            { rule: "{$OpsMxSuperadmin: {eq: true}}" },
+            @opsmxAuthRule(var=$OpsMxGroups base=queryDeploymentTarget path=organization permissions=admin,read)
+    ]},
     add: {
         or: [
             { rule: "{$OpsMxSuperadmin: {eq: true}}" },
@@ -51,6 +56,7 @@ type DeploymentTarget
     "id is randomly assigned"
     id: String! @id
     name: String! @search(by: [exact])
+    isFirewall: Boolean
     organization: Organization! @hasInverse(field: environments)
 }
 
@@ -61,6 +67,7 @@ type Organization implements RBAC
         or: [
             { rule: "{$OpsMxSuperadmin: {eq: true}}" },
             @opsmxAuthRule(var=$OpsMxGroups base=queryOrganization permissions=admin,read,write)
+            @opsmxAuthRule(var=$OpsMxGroups base=queryOrganization path=teams permissions=admin,read)
     ]},
     add: {
         or: [

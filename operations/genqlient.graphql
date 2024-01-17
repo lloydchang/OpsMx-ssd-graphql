@@ -6,6 +6,13 @@ query GetOrganization($id: String!) {
     }
 }
 
+query QueryOrganizationByName($input: String!)  {
+    queryOrganization(filter: { name: { eq: $input } }) {
+        id
+        name
+    }
+}
+
 mutation AddOrganization($input: AddOrganizationInput!) {
     addOrganization(input: [$input], upsert: true) {
         numUids

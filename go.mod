@@ -1,9 +1,10 @@
 module github.com/OpsMx/ssd-graphql
 
-go 1.21.5
+go 1.21
+
+require github.com/Khan/genqlient v0.6.0
 
 require (
-	github.com/Khan/genqlient v0.6.0 // indirect
 	github.com/agnivade/levenshtein v1.1.1 // indirect
 	github.com/alexflint/go-arg v1.4.2 // indirect
 	github.com/alexflint/go-scalar v1.0.0 // indirect
