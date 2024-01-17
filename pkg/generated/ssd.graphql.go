@@ -1259,6 +1259,56 @@ func (v *OrganizationRef) GetTeams() []*TeamRef { return v.Teams }
 // GetEnvironments returns OrganizationRef.Environments, and is useful for accessing the field via an interface.
 func (v *OrganizationRef) GetEnvironments() []*DeploymentTargetRef { return v.Environments }
 
+// QueryDeploymentTargetByIdQueryDeploymentTarget includes the requested fields of the GraphQL type DeploymentTarget.
+// The GraphQL type's documentation follows.
+//
+// DeploymentTarget describes a single place that things can be deployed into,
+// such as an AWS account or a Kubernetes cluster.
+type QueryDeploymentTargetByIdQueryDeploymentTarget struct {
+	// id is randomly assigned
+	Id           string                                                      `json:"id"`
+	Name         string                                                      `json:"name"`
+	IsFirewall   bool                                                        `json:"isFirewall"`
+	Organization *QueryDeploymentTargetByIdQueryDeploymentTargetOrganization `json:"organization"`
+}
+
+// GetId returns QueryDeploymentTargetByIdQueryDeploymentTarget.Id, and is useful for accessing the field via an interface.
+func (v *QueryDeploymentTargetByIdQueryDeploymentTarget) GetId() string { return v.Id }
+
+// GetName returns QueryDeploymentTargetByIdQueryDeploymentTarget.Name, and is useful for accessing the field via an interface.
+func (v *QueryDeploymentTargetByIdQueryDeploymentTarget) GetName() string { return v.Name }
+
+// GetIsFirewall returns QueryDeploymentTargetByIdQueryDeploymentTarget.IsFirewall, and is useful for accessing the field via an interface.
+func (v *QueryDeploymentTargetByIdQueryDeploymentTarget) GetIsFirewall() bool { return v.IsFirewall }
+
+// GetOrganization returns QueryDeploymentTargetByIdQueryDeploymentTarget.Organization, and is useful for accessing the field via an interface.
+func (v *QueryDeploymentTargetByIdQueryDeploymentTarget) GetOrganization() *QueryDeploymentTargetByIdQueryDeploymentTargetOrganization {
+	return v.Organization
+}
+
+// QueryDeploymentTargetByIdQueryDeploymentTargetOrganization includes the requested fields of the GraphQL type Organization.
+type QueryDeploymentTargetByIdQueryDeploymentTargetOrganization struct {
+	// id is randomly assigned
+	Id   string `json:"id"`
+	Name string `json:"name"`
+}
+
+// GetId returns QueryDeploymentTargetByIdQueryDeploymentTargetOrganization.Id, and is useful for accessing the field via an interface.
+func (v *QueryDeploymentTargetByIdQueryDeploymentTargetOrganization) GetId() string { return v.Id }
+
+// GetName returns QueryDeploymentTargetByIdQueryDeploymentTargetOrganization.Name, and is useful for accessing the field via an interface.
+func (v *QueryDeploymentTargetByIdQueryDeploymentTargetOrganization) GetName() string { return v.Name }
+
+// QueryDeploymentTargetByIdResponse is returned by QueryDeploymentTargetById on success.
+type QueryDeploymentTargetByIdResponse struct {
+	QueryDeploymentTarget []*QueryDeploymentTargetByIdQueryDeploymentTarget `json:"queryDeploymentTarget"`
+}
+
+// GetQueryDeploymentTarget returns QueryDeploymentTargetByIdResponse.QueryDeploymentTarget, and is useful for accessing the field via an interface.
+func (v *QueryDeploymentTargetByIdResponse) GetQueryDeploymentTarget() []*QueryDeploymentTargetByIdQueryDeploymentTarget {
+	return v.QueryDeploymentTarget
+}
+
 // QueryOrganizationByNameQueryOrganization includes the requested fields of the GraphQL type Organization.
 type QueryOrganizationByNameQueryOrganization struct {
 	// id is randomly assigned
@@ -1643,6 +1693,14 @@ func (v *__LinkImageIndexToNameInput) GetImageNameId() string { return v.ImageNa
 
 // GetImageIndexId returns __LinkImageIndexToNameInput.ImageIndexId, and is useful for accessing the field via an interface.
 func (v *__LinkImageIndexToNameInput) GetImageIndexId() string { return v.ImageIndexId }
+
+// __QueryDeploymentTargetByIdInput is used internally by genqlient
+type __QueryDeploymentTargetByIdInput struct {
+	Input string `json:"input"`
+}
+
+// GetInput returns __QueryDeploymentTargetByIdInput.Input, and is useful for accessing the field via an interface.
+func (v *__QueryDeploymentTargetByIdInput) GetInput() string { return v.Input }
 
 // __QueryOrganizationByNameInput is used internally by genqlient
 type __QueryOrganizationByNameInput struct {
@@ -2104,6 +2162,47 @@ func LinkImageIndexToName(
 	var err error
 
 	var data LinkImageIndexToNameResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by QueryDeploymentTargetById.
+const QueryDeploymentTargetById_Operation = `
+query QueryDeploymentTargetById ($input: String!) {
+	queryDeploymentTarget(filter: {id:{eq:$input}}) {
+		id
+		name
+		isFirewall
+		organization {
+			id
+			name
+		}
+	}
+}
+`
+
+func QueryDeploymentTargetById(
+	ctx context.Context,
+	client graphql.Client,
+	input string,
+) (*QueryDeploymentTargetByIdResponse, error) {
+	req := &graphql.Request{
+		OpName: "QueryDeploymentTargetById",
+		Query:  QueryDeploymentTargetById_Operation,
+		Variables: &__QueryDeploymentTargetByIdInput{
+			Input: input,
+		},
+	}
+	var err error
+
+	var data QueryDeploymentTargetByIdResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(

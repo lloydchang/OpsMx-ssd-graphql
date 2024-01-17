@@ -34,6 +34,20 @@ mutation AddDeploymentTarget($input: AddDeploymentTargetInput!) {
     }
 }
 
+query QueryDeploymentTargetById($input: String!) {
+    queryDeploymentTarget(
+        filter: { id: { eq: $input } }
+    ) {
+        id
+        name
+        isFirewall
+        organization {
+            id
+            name
+        }
+    }
+}
+
 # Team related queries/mutations
 mutation AddTeam($input: AddTeamInput!) {
     addTeam(input: [$input], upsert: true) {
